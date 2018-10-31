@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.DS_Store
+documentation/*
+
+/src/artifacts/ts/*.ts
+/src/artifacts/json/*.json
