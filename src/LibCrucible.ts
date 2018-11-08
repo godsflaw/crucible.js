@@ -3,10 +3,9 @@
 import Web3 from 'web3';
 import { Provider } from 'web3/providers';
 
-// import { FoundryAPI } from './api';
+import { FoundryAPI } from './api';
 import { BigNumber, instantiateWeb3 } from './util';
 import { Address, TransactionReceipt, Tx } from './types/common';
-import { NULL_ADDRESS } from './constants';
 
 export interface LibCrucibleConfig {
   foundryAddress: Address;
@@ -23,9 +22,7 @@ export interface LibCrucibleConfig {
  */
 class LibCrucible {
   private web3: Web3;
-//  private foundry: FoundryWrapper;
-
-  public static NULL_ADDRESS = NULL_ADDRESS;
+  private foundry: FoundryAPI;
 
   /**
    * An instance of the ListingAPI class containing methods for listing a
@@ -44,7 +41,7 @@ class LibCrucible {
    */
   constructor(provider: Provider, config: LibCrucibleConfig) {
     this.web3 = instantiateWeb3(provider);
-//    this.foundry = new FoundryWrapper(this.web3, config.foundryAddress);
+    this.foundry = new FoundryAPI(this.web3, config.foundryAddress);
 //    this.listings = new ListingAPI(this.web3, this.foundry);
   }
 
@@ -94,6 +91,15 @@ class LibCrucible {
 //  public async getCrucibleCount(): Promise<BigNumber> {
 //    return await this.foundry.getCount();
 //  }
+
+  /**
+   * get the number of crucibles tracked by the foundry
+   *
+   * @return           The number of crucibles tracked by the foundry
+   */
+  public async getCrucibleCount(): Promise<BigNumber> {
+    return await this.foundry.getCount();
+  }
 
 }
 

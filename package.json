@@ -2,8 +2,10 @@
   "name": "crucible.js",
   "version": "1.0.0",
   "description": "crucible.js is a library for interacting with Crucible smart contracts.",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "generate-typings": "abi-gen --abis '../crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
     "test": "jest --runInBand"
   },
   "repository": {
