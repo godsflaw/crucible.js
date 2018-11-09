@@ -37,7 +37,6 @@ test('new LibCrucibe is an object', async t => {
   var libCrucible = t.context.libCrucible;
 
   try {
-    console.log(libCrucible);
     t.is(typeof libCrucible, 'object');
   } catch (err) {
     t.fail(err.message);

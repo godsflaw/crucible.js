@@ -7,7 +7,7 @@
     "build": "npm run generate-typings && npm run build-ts",
     "build-ts": "tsc",
     "generate-typings": "abi-gen --abis '../crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
-    "test": "xo && nyc ava"
+    "test": "npm run build && xo && nyc ava"
   },
   "repository": {
     "type": "git",
