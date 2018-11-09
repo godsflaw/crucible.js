@@ -1,7 +1,7 @@
 import test from 'ava';
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
-const LibCrucible = require('../../').default;
+const LibCrucible = require('../../../').default;
 
 const MNEMONIC = process.env.MNEMONIC;
 const FOUNDRY_PROXY = process.env.FOUNDRY_PROXY;
