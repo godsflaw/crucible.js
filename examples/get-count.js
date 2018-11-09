@@ -1,6 +1,6 @@
 'use strict';
 
-const HDWalletProvider = require("truffle-hdwallet-provider");
+const HDWalletProvider = require('truffle-hdwallet-provider');
 const Web3 = require('web3');
 const foundryJSON = require('../../crucible/build/contracts/Foundry.json');
 
@@ -8,8 +8,8 @@ const MNEMONIC = process.env.MNEMONIC;
 const FOUNDRY_PROXY = process.env.FOUNDRY_PROXY;
 
 if (!MNEMONIC || !FOUNDRY_PROXY) {
-    console.error("Please set a mnemonic, network, and contract address.");
-    return;
+  console.error('Please set a mnemonic, network, and contract address.');
+  return;
 }
 
 let providerUrl;
@@ -31,7 +31,9 @@ let web3 = new Web3(new HDWalletProvider(MNEMONIC, providerUrl));
 let foundry = new web3.eth.Contract(
   foundryJSON.abi,
   FOUNDRY_PROXY,
-  { gasLimit: web3.utils.toWei('10', 'gwei') }
+  {
+    gasLimit: web3.utils.toWei('10', 'gwei')
+  }
 );
 
 async function getCount() {
@@ -41,7 +43,7 @@ async function getCount() {
 (async() => {
   try {
     console.log(await getCount());
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 

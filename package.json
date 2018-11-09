@@ -4,9 +4,10 @@
   "description": "crucible.js is a library for interacting with Crucible smart contracts.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run generate-typings && npm run build-ts",
+    "build-ts": "tsc",
     "generate-typings": "abi-gen --abis '../crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
-    "test": "jest --runInBand"
+    "test": "xo && nyc ava"
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,11 @@
     "commitment",
     "contract"
   ],
-  "author": "Christopher Mooney",
+  "author": {
+    "name": "Christopher Mooney",
+    "email": "chris@dod.net",
+    "url": "https://github.com/godsflaw"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/godsflaw/crucible.js/issues"
@@ -29,67 +34,35 @@
     "node": ">=8.0.0"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
-    "ganache-cli": "6.1.7",
-    "gh-pages": "^1.1.0",
-    "husky": "^0.14.3",
-    "jest": "^22.1.4",
-    "lint-staged": "^7.2.1",
-    "ts-jest": "^23.10.4",
-    "tslint": "^5.9.1",
-    "tslint-eslint-rules": "^5.3.1",
-    "typedoc": "^0.12.0",
-    "typedoc-plugin-markdown": "^1.1.16",
-    "typescript": "^3.1.2"
+    "ava": "^0.15.1",
+    "coveralls": "^3.0.2",
+    "nyc": "^13.1.0",
+    "typescript": "^3.1.2",
+    "xo": "^0.15.0"
   },
   "dependencies": {
-    "@0xproject/types": "^0.8.2",
-    "@0xproject/typescript-typings": "^1.0.4",
-    "@0xproject/utils": "^1.0.4",
-    "@types/bn.js": "^4.11.0",
-    "@types/jest": "^22.0.1",
-    "@types/lodash": "^4.14.108",
-    "@types/lodash.compact": "^3.0.3",
-    "@types/node": "10.0.3",
-    "abi-decoder": "^1.1.0",
-    "bignumber.js": "^5.0.0",
-    "chai-as-promised": "^7.1.1",
-    "chai-bignumber": "^2.0.2",
-    "ethereum-types": "^1.0.4",
-    "ethereumjs-util": "^5.2.0",
-    "jsonschema": "^1.2.4",
-    "lodash": "^4.17.4",
-    "lodash.compact": "^3.0.1",
-    "moment": "^2.22.2",
+    "@0xproject/utils": "^2.0.2",
     "set-protocol-utils": "1.0.0-beta.14",
-    "timekeeper": "^2.1.2",
-    "tiny-promisify": "^1.0.0",
-    "truffle-contract": "^4.0.0-beta.1",
-    "truffle-hdwallet-provider": "^1.0.0-web3one.0",
-    "web3": "1.0.0-beta.36",
-    "web3-utils": "1.0.0-beta.36"
+    "truffle-hdwallet-provider": "0.0.6"
   },
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "testPathIgnorePatterns": [
-      "/dist/",
-      "/_versions/"
-    ],
-    "testURL": "http://localhost/",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ],
-    "moduleNameMapper": {
-      "^@src/(.*)": "<rootDir>/src/$1",
-      "^@test/(.*)": "<rootDir>/test/$1"
+  "ava": {
+    "concurrency": 20
+  },
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text"
+    ]
+  },
+  "xo": {
+    "space": 2,
+    "rules": {
+      "no-else-return": 0,
+      "no-multiple-empty-lines": 0,
+      "no-negated-condition": 0,
+      "no-warning-comments": 0,
+      "xo/no-process-exit": 0,
+      "camelcase": 0
     }
   }
 }
