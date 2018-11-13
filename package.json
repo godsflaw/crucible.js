@@ -6,8 +6,9 @@
   "scripts": {
     "build": "npm run generate-typings && npm run build-ts",
     "build-ts": "tsc",
+    "devchain": "./scripts/devchain",
     "generate-typings": "abi-gen --abis '../crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
-    "test": "npm run build && xo && nyc ava"
+    "test": "npm run devchain && npm run build && xo && nyc ava"
   },
   "repository": {
     "type": "git",
@@ -44,7 +45,8 @@
     "@0xproject/utils": "^2.0.2",
     "@godsflaw/crucible": "^1.0.14",
     "set-protocol-utils": "1.0.0-beta.14",
-    "truffle-hdwallet-provider": "github:trufflesuite/truffle-hdwallet-provider#master"
+    "truffle-hdwallet-provider": "github:trufflesuite/truffle-hdwallet-provider#master",
+    "web3": "1.0.0-beta.36"
   },
   "ava": {
     "concurrency": 20
