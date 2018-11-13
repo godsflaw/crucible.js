@@ -1,1 +1,1 @@
-export const Crucible = require('crucible').CrucibleJSON;
+export const Crucible = require('@godsflaw/crucible').CrucibleJSON;

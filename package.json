@@ -42,8 +42,9 @@
   },
   "dependencies": {
     "@0xproject/utils": "^2.0.2",
+    "@godsflaw/crucible": "^1.0.14",
     "set-protocol-utils": "1.0.0-beta.14",
-    "truffle-hdwallet-provider": "0.0.6"
+    "truffle-hdwallet-provider": "github:trufflesuite/truffle-hdwallet-provider#master"
   },
   "ava": {
     "concurrency": 20
@@ -57,6 +58,7 @@
   "xo": {
     "space": 2,
     "rules": {
+      "comma-dangle": 0,
       "no-else-return": 0,
       "no-multiple-empty-lines": 0,
       "no-negated-condition": 0,

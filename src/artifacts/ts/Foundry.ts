@@ -1,1 +1,1 @@
-export const Foundry = require('crucible').FoundryJSON;
+export const Foundry = require('@godsflaw/crucible').FoundryJSON;
