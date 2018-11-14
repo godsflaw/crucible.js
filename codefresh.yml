@@ -24,7 +24,7 @@ steps:
     create_file:
       path: /codefresh/volume/cf-generated
       name: unit_test_script
-      content: npm test -- --verbose
+      content: npm test -- --verbose ./test/unit
     on_success:
       metadata:
         set:
@@ -61,7 +61,7 @@ steps:
           - vault
         image: '${{BuildingDockerImage}}'
         env_file: ./env-staging
-        command: sh -c 'npm test -- --verbose'
+        command: sh -c 'npm test -- --verbose ./test/integration'
     on_success:
       metadata:
         set:
@@ -91,7 +91,7 @@ steps:
           - vault
         image: '${{BuildingDockerImage}}'
         env_file: ./env-ropsten
-        command: sh -c 'npm test -- --verbose'
+        command: sh -c 'npm test -- --verbose ./test/integration'
     on_success:
       metadata:
         set:
@@ -121,7 +121,7 @@ steps:
           - vault
         image: '${{BuildingDockerImage}}'
         env_file: ./env-kovan
-        command: sh -c 'npm test -- --verbose'
+        command: sh -c 'npm test -- --verbose ./test/integration'
     on_success:
       metadata:
         set:
@@ -151,7 +151,7 @@ steps:
           - vault
         image: '${{BuildingDockerImage}}'
         env_file: ./env-production
-        command: sh -c 'npm test -- --verbose'
+        command: sh -c 'npm test -- --verbose ./test/production'
     on_success:
       metadata:
         set:
