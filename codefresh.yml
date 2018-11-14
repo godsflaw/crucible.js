@@ -1,0 +1,184 @@
+version: '1.0'
+steps:
+  BuildingDockerImage:
+    title: Building Docker Image
+    type: build
+    image_name: godsflaw/crucibe.js
+    working_directory: ./
+    dockerfile: Dockerfile
+    tag: '${{CF_BRANCH_TAG_NORMALIZED}}'
+
+  RunningUnitTests:
+    title: Running Unit Tests
+    when:
+      branch:
+        ignore:
+          - master
+          - ropsten
+          - kovan
+    image: '${{BuildingDockerImage}}'
+    working_directory: IMAGE_WORK_DIR
+    entry_point:
+      - /bin/sh
+      - /codefresh/volume/cf-generated/unit_test_script
+    create_file:
+      path: /codefresh/volume/cf-generated
+      name: unit_test_script
+      content: npm test -- --verbose
+    on_success:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: true
+    on_fail:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: false
+
+  PushingToDockerRegistry:
+    title: Pushing to Docker Registry
+    type: push
+    candidate: '${{BuildingDockerImage}}'
+    tag: '${{CF_BRANCH_TAG_NORMALIZED}}'
+    registry: cfcr
+
+  RunningIntegrationTests:
+    type: composition
+    title: Running Integration Tests
+    when:
+      branch:
+        only:
+          - dev
+    composition:
+      version: '2'
+      services:
+        vault:
+          image: r.cfcr.io/godsflaw/vault:crucible-staging-sealed
+    composition_candidates:
+      test_service:
+        depends_on:
+          - vault
+        image: '${{BuildingDockerImage}}'
+        env_file: ./env-staging
+        command: sh -c 'npm test -- --verbose'
+    on_success:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: true
+    on_fail:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: false
+
+  RunningRopstenTests:
+    type: composition
+    title: Running Ropsten Tests
+    when:
+      branch:
+        only:
+          - ropsten
+    composition:
+      version: '2'
+      services:
+        vault:
+          image: r.cfcr.io/godsflaw/vault:crucible-staging-sealed
+    composition_candidates:
+      test_service:
+        depends_on:
+          - vault
+        image: '${{BuildingDockerImage}}'
+        env_file: ./env-ropsten
+        command: sh -c 'npm test -- --verbose'
+    on_success:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: true
+    on_fail:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: false
+
+  RunningKovanTests:
+    type: composition
+    title: Running Kovan Tests
+    when:
+      branch:
+        only:
+          - kovan
+    composition:
+      version: '2'
+      services:
+        vault:
+          image: r.cfcr.io/godsflaw/vault:crucible-staging-sealed
+    composition_candidates:
+      test_service:
+        depends_on:
+          - vault
+        image: '${{BuildingDockerImage}}'
+        env_file: ./env-kovan
+        command: sh -c 'npm test -- --verbose'
+    on_success:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: true
+    on_fail:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: false
+
+  RunningProductionTests:
+    type: composition
+    title: Running Production Tests
+    when:
+      branch:
+        only:
+          - master
+    composition:
+      version: '2'
+      services:
+        vault:
+          image: r.cfcr.io/godsflaw/vault:crucible-production-sealed
+    composition_candidates:
+      test_service:
+        depends_on:
+          - vault
+        image: '${{BuildingDockerImage}}'
+        env_file: ./env-production
+        command: sh -c 'npm test -- --verbose'
+    on_success:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: true
+    on_fail:
+      metadata:
+        set:
+          - '${{BuildingDockerImage.imageId}}':
+            - CF_QUALITY: false
+
+  LaunchingProduction:
+    type: launch-composition
+    when:
+      branch:
+        only:
+          - master
+    composition:
+      version: '2'
+      services:
+        crucible:
+          depends_on:
+            - vault
+          image: '${{BuildingDockerImage}}'
+          env_file: ./env-production
+          ports:
+            - 8545
+        vault:
+          image: r.cfcr.io/godsflaw/vault:crucible-production-sealed
+    environment_name: 'production'
