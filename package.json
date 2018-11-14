@@ -7,7 +7,7 @@
     "build": "npm run generate-typings && npm run build-ts",
     "build-ts": "tsc",
     "devchain": "./scripts/devchain",
-    "generate-typings": "abi-gen --abis '../crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
+    "generate-typings": "abi-gen --abis './node_modules/@godsflaw/crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
     "test": "npm run devchain && npm run build && xo && nyc ava"
   },
   "repository": {

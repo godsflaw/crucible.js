@@ -21,7 +21,11 @@ ADD package.json ${CRICIBLEJS}
 ADD tsconfig.json ${CRICIBLEJS}
 
 # install codebase
-RUN (cd ${CRICIBLEJS} && echo 'true' > ./docker && npm install && npm run build)
+WORKDIR "${CRICIBLEJS}"
+RUN echo 'true' > ./docker && \
+  npm install -g @0xproject/abi-gen && \
+  npm install && \
+  npm run build
 
 # any ports we want to expose
 # EXPOSE 8545
