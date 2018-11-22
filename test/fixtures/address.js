@@ -15,11 +15,24 @@ function Address(options) {
   this.four = '0x5f63dd526d53edf386ce0f05d1749c1cee2e307a';
   this.five = '0x3d677e3280eed79076af4574364e4ec6ec20f87e';
 
+  this.staging = '0x7af77b0d604D13a41e6d0f2175D8a61d5f1115C9';
+  this.production = '0xB8bBf36ba36fc78F3F137C514Af33709fFFBa604';
+
   this.owner = this.one;
   this.oracle = this.two;
   this.user1 = this.three;
   this.user2 = this.four;
   this.user3 = this.five;
+
+  if (process.env.CRUCIBLE_ENV === 'production') {
+    this.oracle = this.production;
+  } else if (process.env.CRUCIBLE_ENV === 'staging') {
+    this.oracle = this.staging;
+  } else if (process.env.CRUCIBLE_ENV === 'ropsten') {
+    this.oracle = this.staging;
+  } else if (process.env.CRUCIBLE_ENV === 'kovan') {
+    this.oracle = this.staging;
+  }
 }
 
 module.exports = Address;

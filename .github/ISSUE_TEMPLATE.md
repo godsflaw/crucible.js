@@ -10,7 +10,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 * documentation
 
 # Example PR
-https://github.com/godsflaw/crucible.js/pull/50
+https://github.com/godsflaw/crucible.js/pull/2
 
 # Bounty
 None

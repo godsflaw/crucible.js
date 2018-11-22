@@ -29,17 +29,6 @@ export const CrucibleState = {
   KILLED: new BigNumber(7),
 };
 
-export interface CrucibleProperties {
-  owner: Address;
-  beneficiary: Address;
-  startDate: UInt;
-  lockDate: UInt;
-  endDate: UInt;
-  minAmountWei: BigNumber;
-  timeout: UInt;
-  feeNumerator: BigNumber;
-}
-
 export interface JSONRPCRequestPayload {
   params: any[];
   method: string;

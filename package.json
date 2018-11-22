@@ -6,6 +6,7 @@
   "scripts": {
     "build": "npm run generate-typings && npm run build-ts",
     "build-ts": "tsc",
+    "clean": "./scripts/snapshot-reset && rm -fr ./coverage && rm -fr ./dist",
     "devchain": "./scripts/devchain",
     "generate-typings": "abi-gen --abis './node_modules/@godsflaw/crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
     "test": "npm run devchain && npm run build && xo && nyc ava"
@@ -44,6 +45,7 @@
   "dependencies": {
     "@0xproject/utils": "^2.0.2",
     "@godsflaw/crucible": "^1.0.14",
+    "ethereum-types": "^1.1.2",
     "set-protocol-utils": "1.0.0-beta.14",
     "truffle-hdwallet-provider": "github:trufflesuite/truffle-hdwallet-provider#master",
     "typedarray-to-buffer": "^3.1.5",

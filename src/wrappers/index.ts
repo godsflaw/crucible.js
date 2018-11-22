@@ -2,6 +2,6 @@
 
 import { ContractWrapper } from './ContractWrapper';
 import { FoundryWrapper } from './FoundryWrapper';
-// import { CrucibleWrapper } from './CrucibleWrapper';
+import { CrucibleWrapper } from './CrucibleWrapper';
 
-export { ContractWrapper, FoundryWrapper };
+export { ContractWrapper, FoundryWrapper, CrucibleWrapper };
