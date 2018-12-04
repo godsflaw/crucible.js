@@ -4,7 +4,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 # Contribution Checklist
 
-- [ ] first commit title starts with 'CRCIBLEJS-N:'
+- [ ] first commit title starts with 'CRUCIBLEJS-N:'
 - [ ] code approved
 - [ ] tests approved
 - [ ] documentation approved
