@@ -9,7 +9,7 @@
     "clean": "./scripts/snapshot-reset && rm -fr ./coverage && rm -fr ./dist",
     "devchain": "./scripts/devchain",
     "generate-typings": "abi-gen --abis './node_modules/@godsflaw/crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
-    "test": "npm run devchain && npm run build && xo && nyc ava"
+    "test": "./scripts/run_tests"
   },
   "repository": {
     "type": "git",
