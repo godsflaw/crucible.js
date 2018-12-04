@@ -17,6 +17,8 @@ steps:
           - master
           - ropsten
           - kovan
+    composition:
+      version: '2'
     composition_candidates:
       test_service:
         image: '${{BuildingDockerImage}}'
