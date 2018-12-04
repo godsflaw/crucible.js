@@ -9,6 +9,7 @@ steps:
     tag: '${{CF_BRANCH_TAG_NORMALIZED}}'
 
   RunningUnitTests:
+    type: composition
     title: Running Unit Tests
     when:
       branch:
@@ -16,8 +17,6 @@ steps:
           - master
           - ropsten
           - kovan
-    image: '${{BuildingDockerImage}}'
-    working_directory: IMAGE_WORK_DIR
     composition_candidates:
       test_service:
         image: '${{BuildingDockerImage}}'
