@@ -2,7 +2,7 @@
 #
 #
 
-CRUCIBLE_ENV="${CRUCIBLE_ENV:-development}"
+export CRUCIBLE_ENV="${CRUCIBLE_ENV:-development}"
 
 if [ "${CRUCIBLE_ENV}" == "development" ]; then
   if [ "$#" -eq 0 ]; then
