@@ -10,28 +10,6 @@ test.beforeEach(async t => {
   t.context.provider = require('../../fixtures/provider');
   t.context.libCrucible = new LibCrucible(t.context.provider, config);
   t.context.cu = new CrucibleUtils({libCrucible: t.context.libCrucible});
-
-  t.context.cu.txOpts.nonce =
-    await t.context.libCrucible.web3.eth.getTransactionCount(
-      t.context.address.oracle
-    );
-
-  try {
-    var txHash = await t.context.libCrucible.createCrucible(
-      t.context.address.oracle,
-      t.context.address.empty,
-      t.context.cu.startDate(),
-      t.context.cu.lockDate(),
-      t.context.cu.endDate(),
-      t.context.cu.minAmountWei,
-      t.context.cu.timeout,
-      t.context.cu.feeNumerator,
-      t.context.cu.txOpts
-    );
-    await t.context.libCrucible.loadCrucibleFromCreateTxHash(txHash);
-  } catch (err) {
-    t.fail(err.message);
-  }
 });
 
 test.afterEach(async t => {
@@ -39,10 +17,31 @@ test.afterEach(async t => {
   t.context.provider.engine.stop();
 });
 
-test('crucible has 0 commitments', async t => {
+test('creates a new crucible', async t => {
   var libCrucible = t.context.libCrucible;
+  var cu = t.context.cu;
+  var address = t.context.address;
+
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
 
   try {
+    var txHash = await libCrucible.createCrucible(
+      address.oracle,
+      address.empty,
+      cu.startDate(),
+      cu.lockDate(),
+      cu.endDate(),
+      cu.minAmountWei,
+      cu.timeout,
+      cu.feeNumerator,
+      cu.txOpts
+    );
+    t.regex(txHash, /^0x[0-9a-f]+/i, 'got a txHash');
+    t.falsy(libCrucible.crucible, 'crucible not loaded yet');
+    await libCrucible.loadCrucibleFromCreateTxHash(txHash);
+    t.truthy(libCrucible.crucible, 'crucible loaded successfully');
     var commitments = await libCrucible.getCommitmentCount();
     t.is(commitments, '0', 'there are no commitments yet');
   } catch (err) {

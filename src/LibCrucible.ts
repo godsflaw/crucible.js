@@ -3,6 +3,7 @@
 import Web3 from 'web3';
 import { Provider } from 'web3/providers';
 
+import { libCrucibleErrors } from './errors';
 import { FoundryAPI, CrucibleAPI } from './api';
 import { BigNumber, instantiateWeb3 } from './util';
 import { Address, TransactionReceipt, Tx } from './types/common';
@@ -35,10 +36,11 @@ class LibCrucible {
    * Instantiates a new Crucible instance that provides the public interface
    * to the Crucible.js library
    *
-   * @param provider    Provider instance you would like the Crucible.js
-   *                    library to use for interacting with the Ethereum network
-   * @param config      Configuration object conforming to CrucibleConfig with
-   *                    the foundry's proxy address
+   * @param provider         Provider instance you would like the Crucible.js
+   *                         library to use for interacting with the Ethereum
+   *                         network
+   * @param config           Configuration object conforming to CrucibleConfig
+   *                         with the foundry's proxy address
    */
   constructor(provider: Provider, config: LibCrucibleConfig) {
     this.web3 = instantiateWeb3(provider);
@@ -46,6 +48,12 @@ class LibCrucible {
     // TODO(godsflaw): implement backend for listing Crucibles
     // this.listings = new ListingAPI(this.web3, this.foundry);
   }
+
+  /*
+   * METHODS IN THE FOUNDRY
+   */
+
+  /**
 
   /**
    * Creates a new Crucible
@@ -55,32 +63,32 @@ class LibCrucible {
    * async.  If you want the fully instantiated crucible then call
    * loadCrucibleFromCreateTxHash() after this.
    *
-   * @param  validator    Address of validator/oracle/owner
-   * @param  beneficiary  Address of the beneficiary.  This can just be the
-   *                      empty address for pooled penalty behavior, but if
-   *                      you want all penalties, less the fee, to go to one
-   *                      address, this is what you would use.
-   * @param  startDate    Usually the epoch timestamp (seconds) when the
-   *                      Crucible was created.
-   * @param  lockDate     The epoch timestamp (seconds) when the Crucible is
-   *                      no longer taking new participants, and the point
-   *                      when the Crucible begins.  This date allows one
-   *                      to change the Crucible state to LOCKED.
-   * @param  endDate      The epoch timestamp (seconds) when the Crucible is
-   *                      finished.  This date allows one to change the
-   *                      Crucible state to JUDGEMENT.
-   * @param  minAmountWei The minimum commitment amount in Wei.  This must be
-   *                      greater than 0, and is suggested to be greater than
-   *                      gasCost for the different contract interfaces.
-   * @param  timeout      The number of seconds, when added to endDate, that
-   *                      allows one to change the Crucible state to BROKEN.
-   * @param  feeNumerator The parts in a 1000 that the validator/oracle/owner
-   *                      takes as a fee.  e.g. 0/1000 = 0%, 10/1000 = 1%,
-   *                      500/1000 = 50%, and 1000/1000 = 100%. The default is
-   *                      100, so 100/1000 = 10%.
-   * @param  txOpts       Transaction options object conforming to `Tx` with
-   *                      signer, gas, and gasPrice data
-   * @return              Transaction hash
+   * @param  validator       Address of validator/oracle/owner
+   * @param  beneficiary     Address of the beneficiary.  This can just be the
+   *                         empty address for pooled penalty behavior, but if
+   *                         you want all penalties, less the fee, to go to one
+   *                         address, this is what you would use.
+   * @param  startDate       Usually the epoch timestamp (seconds) when the
+   *                         Crucible was created.
+   * @param  lockDate        The epoch timestamp (seconds) when the Crucible is
+   *                         no longer taking new participants, and the point
+   *                         when the Crucible begins.  This date allows one
+   *                         to change the Crucible state to LOCKED.
+   * @param  endDate         The epoch timestamp (seconds) when the Crucible is
+   *                         finished.  This date allows one to change the
+   *                         Crucible state to JUDGEMENT.
+   * @param  minAmountWei    The minimum commitment amount in Wei.  This must be
+   *                         greater than 0, and is suggested to be greater than
+   *                         gasCost for the different contract interfaces.
+   * @param  timeout         The number of seconds, when added to endDate, that
+   *                         allows one to change the Crucible state to BROKEN.
+   * @param  feeNumerator    The parts in a 1000 that the validator/oracle/owner
+   *                         takes as a fee.  e.g. 0/1000 = 0%, 10/1000 = 1%,
+   *                         500/1000 = 50%, and 1000/1000 = 100%. The default
+   *                         is 100, so 100/1000 = 10%.
+   * @param  txOpts          Transaction options object conforming to `Tx` with
+   *                         signer, gas, and gasPrice data
+   * @return                 Transaction hash
    */
   public async createCrucible(
     validator: Address,
@@ -109,35 +117,51 @@ class LibCrucible {
   /**
    * get the number of crucibles tracked by the foundry
    *
-   * @return              The number of crucibles tracked by the foundry
+   * @return                  The number of crucibles tracked by the foundry
    */
   public async getCrucibleCount(): Promise<BigNumber> {
     return await this.foundry.getCount();
   }
 
   /**
-   * get the number of participants/commitments in this crucible
-   *
-   * @return              Number of commitments in crucible
-   */
-  public async getCommitmentCount(): Promise<BigNumber> {
-    return await this.crucible.getCommitmentCount();
-  }
-
-  /**
    * loads a crucible from the transaction hash passed back from createCrucibe()
    *
-   * @param  txHash       the transaction hash from createCrucible()
-   * @return              true if loaded, false otherwise
+   * @param  txHash           the transaction hash from createCrucible()
+   * @return                  void (throws on error)
    */
-  public async loadCrucibleFromCreateTxHash(txHash: string): Promise<boolean> {
+  public async loadCrucibleFromCreateTxHash(txHash: string) {
     let crucibleAddress = await this.foundry.getCrucibleAddressFromCreateTxHash(
       txHash
     );
 
-    this.crucible = new CrucibleAPI(this.web3, crucibleAddress);
+    this.loadCrucibleFromAddress(crucibleAddress);
+  }
 
-    return true;
+  /**
+   * loads a crucible from an address
+   *
+   * @param  crucibleAddress  address of the crucible contract to load
+   * @return                  void (throws on error)
+   */
+  public async loadCrucibleFromAddress(crucibleAddress: Address) {
+    this.crucible = new CrucibleAPI(this.web3, crucibleAddress);
+  }
+
+  /*
+   * METHODS THAT WORK ON A CRUCIBLE
+   */
+
+  /**
+   * get the number of participants/commitments in this crucible
+   *
+   * @return                  Number of commitments in crucible
+   */
+  public async getCommitmentCount(): Promise<BigNumber> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.getCommitmentCount();
   }
 
 }
