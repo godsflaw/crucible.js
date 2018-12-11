@@ -3,9 +3,9 @@
 const child_process = require('child_process');
 const HDWalletProvider = require('truffle-hdwallet-provider');
 
-var provider;
-var mnemonic;
-var providerUrl;
+let provider;
+let mnemonic;
+let providerUrl;
 
 if (process.env.CRUCIBLE_ENV !== 'development') {
   // unseal the vault
@@ -29,7 +29,7 @@ if (process.env.CRUCIBLE_ENV === 'production') {
   provider = new HDWalletProvider(mnemonic, providerUrl);
 } else {
   providerUrl = 'http://localhost:8545/';
-  var privateKeys = [
+  let privateKeys = [
     '859678781994101043ece30f4f1315a919dffee9b5e70f0ac6b8ab3e3fe05fe6',
     '5dcc0555c4e981122cfc6c34b7275604feeaeeca52ac782f36619a99573bf2a0',
     '2e04b35cec26e658516ddb012d3171ee92ca339646fe824648d5582b13b5a829',

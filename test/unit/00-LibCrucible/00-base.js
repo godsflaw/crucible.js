@@ -16,7 +16,7 @@ test.afterEach(async t => {
 });
 
 test('new LibCrucible is an object', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible, 'object');
@@ -26,7 +26,7 @@ test('new LibCrucible is an object', async t => {
 });
 
 test('new LibCrucible has an undefined crucible', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(libCrucible.crucible, undefined, 'crucible is undefined');
@@ -36,7 +36,7 @@ test('new LibCrucible has an undefined crucible', async t => {
 });
 
 test('has createCrucible', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible.createCrucible, 'function');
@@ -46,7 +46,7 @@ test('has createCrucible', async t => {
 });
 
 test('has getCrucibleCount', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible.getCrucibleCount, 'function');
@@ -56,7 +56,7 @@ test('has getCrucibleCount', async t => {
 });
 
 test('has getCommitmentCount', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible.getCommitmentCount, 'function');
@@ -66,7 +66,7 @@ test('has getCommitmentCount', async t => {
 });
 
 test('has loadCrucibleFromCreateTxHash', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible.loadCrucibleFromCreateTxHash, 'function');
@@ -76,7 +76,7 @@ test('has loadCrucibleFromCreateTxHash', async t => {
 });
 
 test('has loadCrucibleFromAddress', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible.loadCrucibleFromAddress, 'function');

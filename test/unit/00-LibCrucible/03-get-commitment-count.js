@@ -18,16 +18,16 @@ test.afterEach(async t => {
 });
 
 test('creates a new crucible', async t => {
-  var libCrucible = t.context.libCrucible;
-  var cu = t.context.cu;
-  var address = t.context.address;
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
 
   cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
     address.oracle
   );
 
   try {
-    var txHash = await libCrucible.createCrucible(
+    let txHash = await libCrucible.createCrucible(
       address.oracle,
       address.empty,
       cu.startDate(),
@@ -42,8 +42,8 @@ test('creates a new crucible', async t => {
     t.falsy(libCrucible.crucible, 'crucible not loaded yet');
     await libCrucible.loadCrucibleFromCreateTxHash(txHash);
     t.truthy(libCrucible.crucible, 'crucible loaded successfully');
-    var commitments = await libCrucible.getCommitmentCount();
-    t.is(commitments, '0', 'there are no commitments yet');
+    let commitments = await libCrucible.getCommitmentCount();
+    t.truthy(commitments.isEqualTo(0), 'there are no commitments yet');
   } catch (err) {
     t.fail(err.message);
   }

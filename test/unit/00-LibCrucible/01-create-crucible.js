@@ -17,7 +17,7 @@ test.beforeEach(async t => {
     );
 
   try {
-    var txHash = await t.context.libCrucible.createCrucible(
+    const txHash = await t.context.libCrucible.createCrucible(
       t.context.address.oracle,
       t.context.address.empty,
       t.context.cu.startDate(),
@@ -40,11 +40,11 @@ test.afterEach(async t => {
 });
 
 test('crucible has 0 commitments', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
-    var commitments = await libCrucible.getCommitmentCount();
-    t.is(commitments, '0', 'there are no commitments yet');
+    const commitments = await libCrucible.getCommitmentCount();
+    t.truthy(commitments.isEqualTo(0), 'there are no commitments yet');
   } catch (err) {
     t.fail(err.message);
   }

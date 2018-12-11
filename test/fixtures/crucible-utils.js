@@ -64,13 +64,13 @@ function CrucibleUtils(options) {
 CrucibleUtils.prototype.sleep = require('util').promisify(setTimeout);
 
 CrucibleUtils.prototype.addDays = function (date, days) {
-  var result = new Date(date);
+  const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 };
 
 CrucibleUtils.prototype.addSeconds = function (date, seconds) {
-  var result = new Date(date);
+  const result = new Date(date);
   result.setTime(result.getTime() + (seconds * 1000));
   return result;
 };
@@ -94,7 +94,7 @@ CrucibleUtils.prototype.endDate = function (secondsFromNow) {
 };
 
 CrucibleUtils.prototype.getGoalState = function (_state) {
-  var state;
+  let state;
 
   switch(_state.toNumber()) {
     case 1:
@@ -135,7 +135,7 @@ CrucibleUtils.prototype.goalStateIsFail = function (state) {
 };
 
 CrucibleUtils.prototype.getCrucibleState = function (_state) {
-  var state;
+  let state;
 
   switch(_state.toNumber()) {
     case 1:
@@ -220,7 +220,7 @@ CrucibleUtils.prototype.crucibleStateIsKilled = function (state) {
 };
 
 CrucibleUtils.prototype.gasCost = async function (_tx) {
-  var tx = _tx;
+  let tx = _tx;
 
   if (tx.gasUsed === undefined) {
     tx = await this.web3.eth.getTransactionReceipt(_tx);

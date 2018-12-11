@@ -11,7 +11,8 @@ import Web3 from 'web3';
 import Contract from "web3/eth/contract";
 import { ABIDefinition } from "web3/eth/abi";
 import { Tx } from "web3/eth/types";
-import { BigNumber, BN, UInt, Web3Utils } from 'set-protocol-utils';
+import { BN, UInt, Web3Utils } from 'set-protocol-utils';
+import { BigNumber } from '../../util';
 
 import { BaseContract, CONTRACT_WRAPPER_ERRORS } from '../base_contract';
 import { classUtils } from '../common';
@@ -29,8 +30,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public penalty = {
@@ -45,8 +46,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public feeDenominator = {
@@ -61,8 +62,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public participants = {
@@ -75,7 +76,7 @@ export class CrucibleContract extends BaseContract {
       const result = await promisify<string
   >(
         self.web3ContractInstance.methods.participants(
-          index_0,
+          index_0.toString(),
         ).call,
         self.web3ContractInstance,
       )();
@@ -143,8 +144,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public timeout = {
@@ -159,8 +160,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public renounceOwnership = {
@@ -236,8 +237,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public owner = {
@@ -268,8 +269,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public feePaid = {
@@ -300,8 +301,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public trackingBalance = {
@@ -316,8 +317,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public state = {
@@ -332,8 +333,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public endDate = {
@@ -348,8 +349,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public reserve = {
@@ -364,8 +365,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public fee = {
@@ -380,8 +381,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public calculateFee = {
@@ -412,8 +413,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public commitments = {
@@ -576,8 +577,8 @@ export class CrucibleContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public participantExists = {
@@ -749,14 +750,14 @@ export class CrucibleContract extends BaseContract {
         txData,
         self.payout.estimateGasAsync.bind(
           self,
-          _startIndex,
-          _records,
+          _startIndex.toString(),
+          _records.toString(),
         ),
       );
       const txHash = await promisify<string>(
         self.web3ContractInstance.methods.payout(
-          _startIndex,
-          _records,
+          _startIndex.toString(),
+          _records.toString(),
         ).send, self.web3ContractInstance,
       )(
         txDataWithDefaults,
@@ -774,8 +775,8 @@ export class CrucibleContract extends BaseContract {
       );
       const gas = await promisify<number>(
         self.web3ContractInstance.methods.payout(
-          _startIndex,
-          _records,
+          _startIndex.toString(),
+          _records.toString(),
         ).estimateGas, self.web3ContractInstance,
       )(
         txDataWithDefaults,
@@ -789,8 +790,8 @@ export class CrucibleContract extends BaseContract {
     ): string {
       const self = this as CrucibleContract;
       const abiEncodedTransactionData = self.web3ContractInstance.methods.payout(
-        _startIndex,
-        _records,
+        _startIndex.toString(),
+        _records.toString(),
       ).encodeABI();
       return abiEncodedTransactionData;
     },
@@ -807,8 +808,8 @@ export class CrucibleContract extends BaseContract {
       const result = await promisify<void
   >(
         self.web3ContractInstance.methods.payout(
-          _startIndex,
-          _records,
+          _startIndex.toString(),
+          _records.toString(),
         ).call,
         self.web3ContractInstance,
       )(

@@ -1,0 +1,12 @@
+#!/bin/sh -x
+
+rm ./src/types/generated/foundry.ts ./src/types/generated/crucible.ts && \
+  npm-run set-abi-gen \
+    --abis './node_modules/@godsflaw/crucible/build/contracts/@(Foundry|Crucible).json' \
+    --out './src/types/generated' \
+    --template './src/types/contract_templates/contract.mustache' \
+    --partials './src/types/contract_templates/partials/*.mustache' && \
+  cat ./src/types/generated/foundry.ts | \
+    sed '1,/public initialize/s/public initialize/public _initialize/' \
+      > ./src/types/generated/foundry.ts.new && \
+  mv ./src/types/generated/foundry.ts.new ./src/types/generated/foundry.ts

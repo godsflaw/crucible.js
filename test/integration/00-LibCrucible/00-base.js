@@ -16,7 +16,7 @@ test.afterEach(async t => {
 });
 
 test('new LibCrucibe is an object', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible, 'object');
@@ -26,7 +26,7 @@ test('new LibCrucibe is an object', async t => {
 });
 
 test('has getCrucibleCount', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible.getCrucibleCount, 'function');
