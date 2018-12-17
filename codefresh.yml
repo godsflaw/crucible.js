@@ -9,6 +9,7 @@ steps:
     tag: '${{CF_BRANCH_TAG_NORMALIZED}}'
 
   RunningUnitTests:
+    type: composition
     title: Running Unit Tests
     when:
       branch:
@@ -16,15 +17,13 @@ steps:
           - master
           - ropsten
           - kovan
-    image: '${{BuildingDockerImage}}'
-    working_directory: IMAGE_WORK_DIR
-    entry_point:
-      - /bin/sh
-      - /codefresh/volume/cf-generated/unit_test_script
-    create_file:
-      path: /codefresh/volume/cf-generated
-      name: unit_test_script
-      content: npm test -- --verbose ./test/unit
+    composition:
+      version: '2'
+    composition_candidates:
+      test_service:
+        image: '${{BuildingDockerImage}}'
+        env_file: ./env-development
+        command: sh -c 'npm test'
     on_success:
       metadata:
         set:
@@ -61,7 +60,7 @@ steps:
           - vault
         image: '${{BuildingDockerImage}}'
         env_file: ./env-staging
-        command: sh -c 'npm test -- --verbose ./test/integration'
+        command: sh -c 'npm test'
     on_success:
       metadata:
         set:
@@ -91,7 +90,7 @@ steps:
           - vault
         image: '${{BuildingDockerImage}}'
         env_file: ./env-ropsten
-        command: sh -c 'npm test -- --verbose ./test/integration'
+        command: sh -c 'npm test'
     on_success:
       metadata:
         set:
@@ -121,7 +120,7 @@ steps:
           - vault
         image: '${{BuildingDockerImage}}'
         env_file: ./env-kovan
-        command: sh -c 'npm test -- --verbose ./test/integration'
+        command: sh -c 'npm test'
     on_success:
       metadata:
         set:
@@ -151,7 +150,7 @@ steps:
           - vault
         image: '${{BuildingDockerImage}}'
         env_file: ./env-production
-        command: sh -c 'npm test -- --verbose ./test/production'
+        command: sh -c 'npm test'
     on_success:
       metadata:
         set:

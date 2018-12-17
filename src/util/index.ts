@@ -1,6 +1,7 @@
 'use strict';
 
+import { awaitTx } from './transactionUtils';
 export { BigNumber } from './bignumber';
 export { ether } from './units';
 export { instantiateWeb3 } from './provider';
-export { generateTxOpts } from './transactionUtils';
+export { awaitTx, generateTxOpts } from './transactionUtils';

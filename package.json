@@ -6,9 +6,10 @@
   "scripts": {
     "build": "npm run generate-typings && npm run build-ts",
     "build-ts": "tsc",
+    "clean": "rm -fr ./devchain && rm -fr ./coverage && rm -fr ./dist",
     "devchain": "./scripts/devchain",
-    "generate-typings": "abi-gen --abis './node_modules/@godsflaw/crucible/build/contracts/@(Foundry|Crucible).json' --out './src/types/generated' --template './src/types/contract_templates/contract.mustache' --partials './src/types/contract_templates/partials/*.mustache'",
-    "test": "npm run devchain && npm run build && xo && nyc ava"
+    "generate-typings": "./scripts/generate-typings",
+    "test": "./scripts/run_tests"
   },
   "repository": {
     "type": "git",
@@ -44,13 +45,16 @@
   "dependencies": {
     "@0xproject/utils": "^2.0.2",
     "@godsflaw/crucible": "^1.0.14",
+    "bignumber.js": "^8.0.1",
+    "ethereum-types": "^1.1.2",
+    "set-abi-gen": "^1.1.0-beta.1",
     "set-protocol-utils": "1.0.0-beta.14",
     "truffle-hdwallet-provider": "github:trufflesuite/truffle-hdwallet-provider#master",
     "typedarray-to-buffer": "^3.1.5",
     "web3": "1.0.0-beta.36"
   },
   "ava": {
-    "concurrency": 20
+    "concurrency": 1
   },
   "nyc": {
     "reporter": [

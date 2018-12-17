@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+#
+
+export CRUCIBLE_ENV="${CRUCIBLE_ENV:-development}"
+
+if [ "${CRUCIBLE_ENV}" == "development" ]; then
+  if [ "$#" -eq 0 ]; then
+    CRUCIBLE_ARGS="./test/unit/*/*.js"
+  else
+    CRUCIBLE_ARGS="$@"
+  fi
+
+  npm run devchain
+elif [ "${CRUCIBLE_ENV}" == "staging" ] || \
+     [ "${CRUCIBLE_ENV}" == "ropsten" ] || \
+     [ "${CRUCIBLE_ENV}" == "kovan" ]; then
+  if [ "$#" -eq 0 ]; then
+    CRUCIBLE_ARGS="./test/unit/*/*.js"
+  else
+    CRUCIBLE_ARGS="$@"
+  fi
+fi
+
+npm run build && xo && nyc ava --verbose ${CRUCIBLE_ARGS}

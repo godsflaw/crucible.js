@@ -23,7 +23,7 @@ ADD tsconfig.json ${CRICIBLEJS}
 # install codebase
 WORKDIR "${CRICIBLEJS}"
 RUN echo 'true' > ./docker && \
-  npm install -g @0xproject/abi-gen && \
+  npm install -g npm-run && \
   npm install && \
   npm run build
 

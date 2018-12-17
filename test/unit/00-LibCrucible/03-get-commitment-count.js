@@ -17,7 +17,7 @@ test.afterEach(async t => {
   t.context.provider.engine.stop();
 });
 
-test('returns correct amount of crucibles', async t => {
+test('creates a new crucible', async t => {
   const libCrucible = t.context.libCrucible;
   const cu = t.context.cu;
   const address = t.context.address;
@@ -27,8 +27,7 @@ test('returns correct amount of crucibles', async t => {
   );
 
   try {
-    let beforeCount = await libCrucible.getCrucibleCount();
-    const txHash = await libCrucible.createCrucible(
+    let txHash = await libCrucible.createCrucible(
       address.oracle,
       address.empty,
       cu.startDate(),
@@ -39,9 +38,12 @@ test('returns correct amount of crucibles', async t => {
       cu.feeNumerator,
       cu.txOpts
     );
+    t.regex(txHash, /^0x[0-9a-f]+/i, 'got a txHash');
+    t.falsy(libCrucible.crucible, 'crucible not loaded yet');
     await libCrucible.loadCrucibleFromCreateTxHash(txHash);
-    let afterCount = await libCrucible.getCrucibleCount();
-    t.truthy(afterCount.isGreaterThan(beforeCount), 'crucible count grew');
+    t.truthy(libCrucible.crucible, 'crucible loaded successfully');
+    let commitments = await libCrucible.getCommitmentCount();
+    t.truthy(commitments.isEqualTo(0), 'there are no commitments yet');
   } catch (err) {
     t.fail(err.message);
   }

@@ -1,7 +1,6 @@
 'use strict';
 
 import { FoundryAPI } from './FoundryAPI';
+import { CrucibleAPI } from './CrucibleAPI';
 
-export {
-  FoundryAPI,
-};
+export { FoundryAPI, CrucibleAPI };

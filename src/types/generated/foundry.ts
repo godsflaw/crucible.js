@@ -11,7 +11,8 @@ import Web3 from 'web3';
 import Contract from "web3/eth/contract";
 import { ABIDefinition } from "web3/eth/abi";
 import { Tx } from "web3/eth/types";
-import { BigNumber, BN, UInt, Web3Utils } from 'set-protocol-utils';
+import { BN, UInt, Web3Utils } from 'set-protocol-utils';
+import { BigNumber } from '../../util';
 
 import { BaseContract, CONTRACT_WRAPPER_ERRORS } from '../base_contract';
 import { classUtils } from '../common';
@@ -27,7 +28,7 @@ export class FoundryContract extends BaseContract {
       const result = await promisify<string
   >(
         self.web3ContractInstance.methods.crucibles(
-          index_0,
+          index_0.toString(),
         ).call,
         self.web3ContractInstance,
       )();
@@ -202,6 +203,137 @@ export class FoundryContract extends BaseContract {
       return result;
     },
   };
+  public _initialize = {
+    async sendTransactionAsync(
+      txData: Tx = {},
+    ): Promise<string> {
+      const self = this as FoundryContract;
+      const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+        txData,
+        self.initialize.estimateGasAsync.bind(
+          self,
+        ),
+      );
+      const txHash = await promisify<string>(
+        self.web3ContractInstance.methods.initialize(
+        ).send, self.web3ContractInstance,
+      )(
+        txDataWithDefaults,
+      );
+      return txHash;
+    },
+    async estimateGasAsync(
+      txData: Tx = {},
+    ): Promise<number> {
+      const self = this as FoundryContract;
+      const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+        txData,
+      );
+      const gas = await promisify<number>(
+        self.web3ContractInstance.methods.initialize(
+        ).estimateGas, self.web3ContractInstance,
+      )(
+        txDataWithDefaults,
+      );
+      return gas;
+    },
+    getABIEncodedTransactionData(
+      txData: Tx = {},
+    ): string {
+      const self = this as FoundryContract;
+      const abiEncodedTransactionData = self.web3ContractInstance.methods.initialize(
+      ).encodeABI();
+      return abiEncodedTransactionData;
+    },
+    async callAsync(
+      txData: Tx = {},
+    ): Promise<void
+  > {
+      const self = this as FoundryContract;
+      const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+        txData,
+      );
+      const result = await promisify<void
+  >(
+        self.web3ContractInstance.methods.initialize(
+        ).call,
+        self.web3ContractInstance,
+      )(
+        txDataWithDefaults,
+      );
+      return result;
+    },
+  };
+  public initialize = {
+    async sendTransactionAsync(
+      _owner: string,
+      txData: Tx = {},
+    ): Promise<string> {
+      const self = this as FoundryContract;
+      const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+        txData,
+        self.initialize.estimateGasAsync.bind(
+          self,
+          _owner,
+        ),
+      );
+      const txHash = await promisify<string>(
+        self.web3ContractInstance.methods.initialize(
+          _owner,
+        ).send, self.web3ContractInstance,
+      )(
+        txDataWithDefaults,
+      );
+      return txHash;
+    },
+    async estimateGasAsync(
+      _owner: string,
+      txData: Tx = {},
+    ): Promise<number> {
+      const self = this as FoundryContract;
+      const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+        txData,
+      );
+      const gas = await promisify<number>(
+        self.web3ContractInstance.methods.initialize(
+          _owner,
+        ).estimateGas, self.web3ContractInstance,
+      )(
+        txDataWithDefaults,
+      );
+      return gas;
+    },
+    getABIEncodedTransactionData(
+      _owner: string,
+      txData: Tx = {},
+    ): string {
+      const self = this as FoundryContract;
+      const abiEncodedTransactionData = self.web3ContractInstance.methods.initialize(
+        _owner,
+      ).encodeABI();
+      return abiEncodedTransactionData;
+    },
+    async callAsync(
+      _owner: string,
+      txData: Tx = {},
+    ): Promise<void
+  > {
+      const self = this as FoundryContract;
+      const txDataWithDefaults = await self.applyDefaultsToTxDataAsync(
+        txData,
+      );
+      const result = await promisify<void
+  >(
+        self.web3ContractInstance.methods.initialize(
+          _owner,
+        ).call,
+        self.web3ContractInstance,
+      )(
+        txDataWithDefaults,
+      );
+      return result;
+    },
+  };
   public getCount = {
     async callAsync(
       defaultBlock?: any,
@@ -214,8 +346,8 @@ export class FoundryContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public getIndexOf = {
@@ -232,8 +364,8 @@ export class FoundryContract extends BaseContract {
         ).call,
         self.web3ContractInstance,
       )();
+      return new BigNumber(result);
       
-      return result;
     },
   };
   public newCrucible = {
@@ -255,24 +387,24 @@ export class FoundryContract extends BaseContract {
           self,
           _owner,
           _beneficiary,
-          _startDate,
-          _lockDate,
-          _endDate,
-          _minimumAmount,
-          _timeout,
-          _feeNumerator,
+          _startDate.toString(),
+          _lockDate.toString(),
+          _endDate.toString(),
+          _minimumAmount.toString(),
+          _timeout.toString(),
+          _feeNumerator.toString(),
         ),
       );
       const txHash = await promisify<string>(
         self.web3ContractInstance.methods.newCrucible(
           _owner,
           _beneficiary,
-          _startDate,
-          _lockDate,
-          _endDate,
-          _minimumAmount,
-          _timeout,
-          _feeNumerator,
+          _startDate.toString(),
+          _lockDate.toString(),
+          _endDate.toString(),
+          _minimumAmount.toString(),
+          _timeout.toString(),
+          _feeNumerator.toString(),
         ).send, self.web3ContractInstance,
       )(
         txDataWithDefaults,
@@ -298,12 +430,12 @@ export class FoundryContract extends BaseContract {
         self.web3ContractInstance.methods.newCrucible(
           _owner,
           _beneficiary,
-          _startDate,
-          _lockDate,
-          _endDate,
-          _minimumAmount,
-          _timeout,
-          _feeNumerator,
+          _startDate.toString(),
+          _lockDate.toString(),
+          _endDate.toString(),
+          _minimumAmount.toString(),
+          _timeout.toString(),
+          _feeNumerator.toString(),
         ).estimateGas, self.web3ContractInstance,
       )(
         txDataWithDefaults,
@@ -325,12 +457,12 @@ export class FoundryContract extends BaseContract {
       const abiEncodedTransactionData = self.web3ContractInstance.methods.newCrucible(
         _owner,
         _beneficiary,
-        _startDate,
-        _lockDate,
-        _endDate,
-        _minimumAmount,
-        _timeout,
-        _feeNumerator,
+        _startDate.toString(),
+        _lockDate.toString(),
+        _endDate.toString(),
+        _minimumAmount.toString(),
+        _timeout.toString(),
+        _feeNumerator.toString(),
       ).encodeABI();
       return abiEncodedTransactionData;
     },
@@ -355,12 +487,12 @@ export class FoundryContract extends BaseContract {
         self.web3ContractInstance.methods.newCrucible(
           _owner,
           _beneficiary,
-          _startDate,
-          _lockDate,
-          _endDate,
-          _minimumAmount,
-          _timeout,
-          _feeNumerator,
+          _startDate.toString(),
+          _lockDate.toString(),
+          _endDate.toString(),
+          _minimumAmount.toString(),
+          _timeout.toString(),
+          _feeNumerator.toString(),
         ).call,
         self.web3ContractInstance,
       )(
@@ -381,13 +513,13 @@ export class FoundryContract extends BaseContract {
         self.deleteCrucible.estimateGasAsync.bind(
           self,
           _address,
-          _index,
+          _index.toString(),
         ),
       );
       const txHash = await promisify<string>(
         self.web3ContractInstance.methods.deleteCrucible(
           _address,
-          _index,
+          _index.toString(),
         ).send, self.web3ContractInstance,
       )(
         txDataWithDefaults,
@@ -406,7 +538,7 @@ export class FoundryContract extends BaseContract {
       const gas = await promisify<number>(
         self.web3ContractInstance.methods.deleteCrucible(
           _address,
-          _index,
+          _index.toString(),
         ).estimateGas, self.web3ContractInstance,
       )(
         txDataWithDefaults,
@@ -421,7 +553,7 @@ export class FoundryContract extends BaseContract {
       const self = this as FoundryContract;
       const abiEncodedTransactionData = self.web3ContractInstance.methods.deleteCrucible(
         _address,
-        _index,
+        _index.toString(),
       ).encodeABI();
       return abiEncodedTransactionData;
     },
@@ -439,7 +571,7 @@ export class FoundryContract extends BaseContract {
   >(
         self.web3ContractInstance.methods.deleteCrucible(
           _address,
-          _index,
+          _index.toString(),
         ).call,
         self.web3ContractInstance,
       )(

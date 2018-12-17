@@ -15,8 +15,8 @@ test.afterEach(async t => {
   t.context.provider.engine.stop();
 });
 
-test('new LibCrucibe is an object', async t => {
-  var libCrucible = t.context.libCrucible;
+test('new LibCrucible is an object', async t => {
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible, 'object');
@@ -25,11 +25,71 @@ test('new LibCrucibe is an object', async t => {
   }
 });
 
+test('new LibCrucible has an undefined crucible', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(libCrucible.crucible, undefined, 'crucible is undefined');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has createCrucible', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.createCrucible, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
 test('has getCrucibleCount', async t => {
-  var libCrucible = t.context.libCrucible;
+  const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible.getCrucibleCount, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has getCommitmentCount', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getCommitmentCount, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has loadCrucibleFromCreateTxHash', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.loadCrucibleFromCreateTxHash, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has loadCrucibleFromAddress', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.loadCrucibleFromAddress, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has loadCrucibleFromIndex', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.loadCrucibleFromIndex, 'function');
   } catch (err) {
     t.fail(err.message);
   }
