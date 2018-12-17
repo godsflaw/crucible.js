@@ -16,7 +16,7 @@ import { Address, Tx } from '../types/common';
  * allows for interaction with a particular crucible.
  */
 export class CrucibleAPI {
-  private address: Address;
+  public address: Address;
   private crucibleWrapper: CrucibleWrapper;
   private web3: Web3;
 

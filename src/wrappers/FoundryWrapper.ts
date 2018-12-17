@@ -58,6 +58,22 @@ export class FoundryWrapper {
   }
 
   /**
+   * get the crucible address from a particular index
+   *
+   * @param  foundryAddress   The address of the foundry contract
+   * @param  index            the index of the crucible to get
+   * @return                  Address of the crucible contract
+   */
+  public async getCrucibleAddressFromIndex(
+    foundryAddress: Address,
+    index: BigNumber
+  ): Promise<Address> {
+    const foundryInstance = await this.contracts.loadFoundry(foundryAddress);
+
+    return await foundryInstance.crucibles.callAsync(index);
+  }
+
+  /**
    * Gets the number of crucibles tracked by the foundry
    *
    * @param  foundryAddress   The address of the foundry contract

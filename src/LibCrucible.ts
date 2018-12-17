@@ -147,12 +147,27 @@ class LibCrucible {
     this.crucible = new CrucibleAPI(this.web3, crucibleAddress);
   }
 
+  /**
+   * loads a crucible from an index
+   *
+   * @param  index            index of the crucible address
+   * @return                  void (throws on error)
+   */
+  public async loadCrucibleFromIndex(index: BigNumber) {
+    let crucibleAddress = await this.foundry.getCrucibleAddressFromIndex(
+      index
+    );
+
+    this.crucible = new CrucibleAPI(this.web3, crucibleAddress);
+  }
+
   /*
    * METHODS THAT WORK ON A CRUCIBLE
    */
 
   /**
    * get the number of participants/commitments in this crucible
+   * TODO(godsflaw): test me
    *
    * @return                  Number of commitments in crucible
    */

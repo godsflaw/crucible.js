@@ -1,5 +1,6 @@
 "use strict";
 
+const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 const Address = require('./address');
 
@@ -227,6 +228,27 @@ CrucibleUtils.prototype.gasCost = async function (_tx) {
   }
 
   return (this.gasPrice * tx.gasUsed);
+};
+
+// if we can't find an existing crucible to load, create one
+CrucibleUtils.prototype.loadOrCreateCrucible = async function (context) {
+  const crucibleCount = await context.libCrucible.getCrucibleCount();
+  if (crucibleCount.eq(0)) {
+    const txHash = await context.libCrucible.createCrucible(
+      context.address.oracle,
+      context.address.empty,
+      context.cu.startDate(),
+      context.cu.lockDate(),
+      context.cu.endDate(),
+      context.cu.minAmountWei,
+      context.cu.timeout,
+      context.cu.feeNumerator,
+      context.cu.txOpts
+    );
+    await context.libCrucible.loadCrucibleFromCreateTxHash(txHash);
+  } else {
+    await context.libCrucible.loadCrucibleFromIndex(new BigNumber(0));
+  }
 };
 
 module.exports = CrucibleUtils;

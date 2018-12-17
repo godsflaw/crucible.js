@@ -115,6 +115,19 @@ export class FoundryAPI {
     );
   }
 
+  /**
+   * get a crucible address from an index number
+   *
+   * @param  index           the index of the crucible
+   * @return                 Address of the crucibe contract at that index
+   */
+  public async getCrucibleAddressFromIndex(index: BigNumber): Promise<Address> {
+    return await this.foundryWrapper.getCrucibleAddressFromIndex(
+      this.address,
+      index
+    );
+  }
+
 //  /**
 //   * Deletes the Crucible contract specified by crucibleAddress
 //   *
