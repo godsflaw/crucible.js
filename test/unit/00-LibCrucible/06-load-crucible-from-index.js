@@ -19,7 +19,6 @@ test.beforeEach(async t => {
   await t.context.cu.loadOrCreateCrucible(t.context);
 
   t.context.crucibleCount = await t.context.libCrucible.getCrucibleCount();
-  t.context.crucibleAddress = t.context.libCrucible.crucible.address;
 });
 
 test.afterEach(async t => {
@@ -29,15 +28,11 @@ test.afterEach(async t => {
 
 test('can load crucible from an index', async t => {
   const libCrucible = new LibCrucible(t.context.provider, config);
-  const crucibleAddress = t.context.crucibleAddress;
 
   try {
     t.falsy(libCrucible.crucible, 'crucible is not defined yet');
     await libCrucible.loadCrucibleFromIndex(t.context.crucibleCount - 1);
     t.truthy(libCrucible.crucible, 'crucible is defined');
-    t.is(
-      libCrucible.crucible.address, crucibleAddress, 'crucible address matches'
-    );
   } catch (err) {
     t.fail(err.message);
   }

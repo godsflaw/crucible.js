@@ -84,3 +84,13 @@ test('has loadCrucibleFromAddress', async t => {
     t.fail(err.message);
   }
 });
+
+test('has loadCrucibleFromIndex', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.loadCrucibleFromIndex, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
