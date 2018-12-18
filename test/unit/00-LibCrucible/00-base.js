@@ -45,6 +45,16 @@ test('has createCrucible', async t => {
   }
 });
 
+test('has deleteCrucibleFromFoundry', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.deleteCrucibleFromFoundry, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
 test('has getCrucibleCount', async t => {
   const libCrucible = t.context.libCrucible;
 

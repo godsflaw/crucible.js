@@ -74,6 +74,22 @@ export class FoundryWrapper {
   }
 
   /**
+   * get the crucible index from a particular address
+   *
+   * @param  foundryAddress   The address of the foundry contract
+   * @param  index            the index of the crucible to get
+   * @return                  the index of the crucible
+   */
+  public async getCrucibleIndexFromAddress(
+    foundryAddress: Address,
+    crucibleAddress: Address
+  ): Promise<BigNumber> {
+    const foundryInstance = await this.contracts.loadFoundry(foundryAddress);
+
+    return await foundryInstance.getIndexOf.callAsync(crucibleAddress);
+  }
+
+  /**
    * Gets the number of crucibles tracked by the foundry
    *
    * @param  foundryAddress   The address of the foundry contract
@@ -140,6 +156,32 @@ export class FoundryWrapper {
       minAmountWei,
       timeout,
       feeNumerator,
+      txOptions
+    );
+  }
+
+  /**
+   * Delete a Crucible contract from the foundry listing
+   *
+   * @param  foundryAddress   The address of the foundry contract
+   * @param  crucibleAddress  The address of the crucible to remove
+   * @param  index            The index of the given crucible
+   * @param  txOpts           Transaction options object conforming to `Tx` with
+   *                          signer, gas, and gasPrice data
+   * @return                  The hash of the resulting transaction.
+   */
+  public async deleteCrucible(
+    foundryAddress: Address,
+    crucibleAddress: Address,
+    index: BigNumber,
+    txOpts: Tx
+  ): Promise<string> {
+    const foundryInstance = await this.contracts.loadFoundry(foundryAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await foundryInstance.deleteCrucible.sendTransactionAsync(
+      crucibleAddress,
+      index,
       txOptions
     );
   }

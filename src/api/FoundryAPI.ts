@@ -128,16 +128,38 @@ export class FoundryAPI {
     );
   }
 
-//  /**
-//   * Deletes the Crucible contract specified by crucibleAddress
-//   *
-//   * @param  addr            Address of the Crucible contract to delete
-//   * @param  txOpts          Transaction options object conforming to `Tx` with
-//   *                         signer, gas, and gasPrice data
-//   * @return                 Transaction hash
-//   */
-//  public async deleteCrucible(addr: Address, txOpts: Tx): Promise<string> {
-//    return await this.foundryWrapper.deleteCrucible(this.address, addr, txOpts);
-//  }
+  /**
+   * get a crucible address from an index number
+   *
+   * @param  crucibleAddress the Address of the crucible
+   * @return                 the index of the crucible
+   */
+  public async getCrucibleIndexFromAddress(
+    crucibleAddress: Address
+  ): Promise<BigNumber> {
+    return await this.foundryWrapper.getCrucibleIndexFromAddress(
+      this.address,
+      crucibleAddress
+    );
+  }
+
+  /**
+   * Deletes the Crucible contract specified by crucibleAddress
+   *
+   * @param  addr            Address of the Crucible contract to delete
+   * @param  txOpts          Transaction options object conforming to `Tx` with
+   *                         signer, gas, and gasPrice data
+   * @return                 Transaction hash
+   */
+  public async deleteCrucible(
+    crucibleAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    const index = await this.getCrucibleIndexFromAddress(crucibleAddress);
+
+    return await this.foundryWrapper.deleteCrucible(
+      this.address, crucibleAddress, index, txOpts
+    );
+  }
 
 }
