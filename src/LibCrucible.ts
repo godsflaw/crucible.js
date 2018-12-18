@@ -161,6 +161,21 @@ class LibCrucible {
     this.crucible = new CrucibleAPI(this.web3, crucibleAddress);
   }
 
+  /**
+   * removes the listing of a crucible from the foundry
+   *
+   * @param  crucibleAddress  the crucible address to remove from the foundry
+   * @param  txOpts           Transaction options object conforming to `Tx` with
+   *                          signer, gas, and gasPrice data
+   * @return                  Transaction hash
+   */
+  private async deleteCrucibleFromFoundry(
+    crucibleAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    return await this.foundry.deleteCrucible(crucibleAddress, txOpts);
+  }
+
   /*
    * METHODS THAT WORK ON A CRUCIBLE
    */
