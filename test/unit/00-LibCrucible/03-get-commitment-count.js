@@ -56,7 +56,11 @@ test.serial('crucible should have 1 commitment after add', async t => {
   const cu = t.context.cu;
   const address = t.context.address;
 
+  cu.txOpts.from = address.user1;
   cu.txOpts.value = cu.riskAmountWei;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.user1
+  );
 
   try {
     await libCrucible.addCommitment(
