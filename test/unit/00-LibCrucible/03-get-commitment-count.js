@@ -1,49 +1,69 @@
 import test from 'ava';
 
+const BigNumber = require('bignumber.js');
 const LibCrucible = require('../../../').default;
 const Address = require('../../fixtures/address');
 const config = require('../../fixtures/config');
 const CrucibleUtils = require('../../fixtures/crucible-utils');
 
-test.beforeEach(async t => {
+test.before(async t => {
   t.context.address = new Address();
   t.context.provider = require('../../fixtures/provider');
   t.context.libCrucible = new LibCrucible(t.context.provider, config);
   t.context.cu = new CrucibleUtils({libCrucible: t.context.libCrucible});
+
+  t.context.cu.txOpts.nonce =
+    await t.context.libCrucible.web3.eth.getTransactionCount(
+      t.context.address.oracle
+    );
+
+  try {
+    const txHash = await t.context.libCrucible.createCrucible(
+      t.context.address.oracle,
+      t.context.address.empty,
+      t.context.cu.startDate(),
+      t.context.cu.lockDate(),
+      t.context.cu.endDate(),
+      t.context.cu.minAmountWei,
+      t.context.cu.timeout,
+      t.context.cu.feeNumerator,
+      t.context.cu.txOpts
+    );
+    await t.context.libCrucible.loadCrucibleFromCreateTxHash(txHash);
+  } catch (err) {
+    t.fail(err.message);
+  }
 });
 
-test.afterEach(async t => {
+test.after(async t => {
   t.context.libCrucible.web3.setProvider(null);
   t.context.provider.engine.stop();
 });
 
-test('creates a new crucible', async t => {
+test.serial('new crucible should have 0 commitments', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    let commitments = await libCrucible.getCommitmentCount();
+    t.truthy(commitments.eq(new BigNumber(0)), 'there are no commitments yet');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test.serial('crucible should have 1 commitment after add', async t => {
   const libCrucible = t.context.libCrucible;
   const cu = t.context.cu;
   const address = t.context.address;
 
-  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
-    address.oracle
-  );
+  cu.txOpts.value = cu.riskAmountWei;
 
   try {
-    let txHash = await libCrucible.createCrucible(
-      address.oracle,
-      address.empty,
-      cu.startDate(),
-      cu.lockDate(),
-      cu.endDate(),
-      cu.minAmountWei,
-      cu.timeout,
-      cu.feeNumerator,
-      cu.txOpts
+    await libCrucible.addCommitment(
+      address.user1, cu.txOpts
     );
-    t.regex(txHash, /^0x[0-9a-f]+/i, 'got a txHash');
-    t.falsy(libCrucible.crucible, 'crucible not loaded yet');
-    await libCrucible.loadCrucibleFromCreateTxHash(txHash);
-    t.truthy(libCrucible.crucible, 'crucible loaded successfully');
     let commitments = await libCrucible.getCommitmentCount();
-    t.truthy(commitments.isEqualTo(0), 'there are no commitments yet');
+    t.truthy(commitments.eq(new BigNumber(1)), 'commitment count is correct');
   } catch (err) {
     t.fail(err.message);
   }

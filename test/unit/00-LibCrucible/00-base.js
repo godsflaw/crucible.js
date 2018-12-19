@@ -65,16 +65,6 @@ test('has getCrucibleCount', async t => {
   }
 });
 
-test('has getCommitmentCount', async t => {
-  const libCrucible = t.context.libCrucible;
-
-  try {
-    t.is(typeof libCrucible.getCommitmentCount, 'function');
-  } catch (err) {
-    t.fail(err.message);
-  }
-});
-
 test('has loadCrucibleFromCreateTxHash', async t => {
   const libCrucible = t.context.libCrucible;
 
@@ -100,6 +90,36 @@ test('has loadCrucibleFromIndex', async t => {
 
   try {
     t.is(typeof libCrucible.loadCrucibleFromIndex, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has addCommitment', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.addCommitment, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has participantExists', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.participantExists, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has getCommitmentCount', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getCommitmentCount, 'function');
   } catch (err) {
     t.fail(err.message);
   }

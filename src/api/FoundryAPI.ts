@@ -146,7 +146,7 @@ export class FoundryAPI {
   /**
    * Deletes the Crucible contract specified by crucibleAddress
    *
-   * @param  addr            Address of the Crucible contract to delete
+   * @param  crucibleAddress Address of the Crucible contract to delete
    * @param  txOpts          Transaction options object conforming to `Tx` with
    *                         signer, gas, and gasPrice data
    * @return                 Transaction hash
