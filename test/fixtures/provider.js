@@ -9,9 +9,9 @@ let providerUrl;
 
 if (process.env.CRUCIBLE_ENV !== 'development') {
   // unseal the vault
-  child_process.execSync('../../../scripts/vault-unseal.js');
+  child_process.execSync('./scripts/vault-unseal.js');
   mnemonic = child_process.execSync(
-    '../../../scripts/vault-get-mnemonic.js'
+    './scripts/vault-get-mnemonic.js'
   ).toString().replace(/\n/, '');
 }
 
