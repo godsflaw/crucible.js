@@ -181,8 +181,43 @@ class LibCrucible {
    */
 
   /**
+   * Used to add a commitment to the loaded crucible with a given participant
+   * and amount.
+   *
+   * @param  participantAddress   the address of the participant
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  private async addCommitment(
+    participantAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.addCommitment(participantAddress, txOpts);
+  }
+
+  /**
+   * check to see of a participant exists
+   *
+   * @param  participantAddress   the address of the participant
+   * @return                      true if participant exists, false otherwise
+   */
+  public async participantExists(
+    participantAddress: Address
+  ): Promise<boolean> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.participantExists(participantAddress);
+  }
+
+  /**
    * get the number of participants/commitments in this crucible
-   * TODO(godsflaw): test me
    *
    * @return                  Number of commitments in crucible
    */

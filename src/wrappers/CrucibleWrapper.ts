@@ -25,14 +25,56 @@ export class CrucibleWrapper {
   }
 
   /**
+   * Add a participant to a crucible
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  participantAddress The address of the participant to add
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and -- most
+   *                            importantly for this case -- value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async add(
+    crucibleAddress: Address,
+    participantAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.add.sendTransactionAsync(
+      participantAddress,
+      txOptions
+    );
+  }
+
+  /**
    * Gets the number of participants/commitments in this crucible
    *
-   * @param  crucibleAddress   The address of the crucible contract
-   * @return                  Number of commitments in crucible
+   * @param  crucibleAddress      The address of the crucible contract
+   * @return                      Number of commitments in crucible
    */
   public async getCommitmentCount(crucibleAddress: Address): Promise<BigNumber> {
     const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
 
     return await crucibleInstance.count.callAsync();
+  }
+
+  /**
+   * Gets the number of participants/commitments in this crucible
+   *
+   * @param  crucibleAddress      The address of the crucible contract
+   * @param  participantAddress   the address of the participant
+   * @return                      true if participant exists, false otherwise
+   */
+  public async participantExists(
+    crucibleAddress: Address,
+    participantAddress: Address
+  ): Promise<boolean> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+
+    return await crucibleInstance.participantExists.callAsync(
+      participantAddress
+    );
   }
 }
