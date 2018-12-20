@@ -44,6 +44,9 @@ test('removes an existing crucible', async t => {
     let afterCount = await libCrucible.getCrucibleCount();
     t.truthy(afterCount.isGreaterThan(beforeCount), 'crucible count grew');
     cu.txOpts.from = address.owner;
+    cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+      address.owner
+    );
     txHash = await libCrucible.deleteCrucibleFromFoundry(
       libCrucible.crucible.address,
       cu.txOpts

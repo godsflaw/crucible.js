@@ -63,11 +63,29 @@ test.serial('crucible should have 1 commitment after add', async t => {
   );
 
   try {
-    await libCrucible.addCommitment(
-      address.user1, cu.txOpts
-    );
+    await libCrucible.addCommitment(address.user1, cu.txOpts);
     let commitments = await libCrucible.getCommitmentCount();
     t.truthy(commitments.eq(new BigNumber(1)), 'commitment count is correct');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test.serial('crucible should have 2 commitment after add', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.user2;
+  cu.txOpts.value = cu.riskAmountWei;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.user2
+  );
+
+  try {
+    await libCrucible.addCommitment(address.user2, cu.txOpts);
+    let commitments = await libCrucible.getCommitmentCount();
+    t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
   } catch (err) {
     t.fail(err.message);
   }
