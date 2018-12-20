@@ -183,7 +183,6 @@ class LibCrucible {
   /**
    * Used to add a commitment to the loaded crucible with a given participant
    * and amount.
-   * TODO(godsflaw): test me
    *
    * @param  participantAddress   the address of the participant
    * @param  txOpts               Transaction options object conforming to
@@ -203,7 +202,6 @@ class LibCrucible {
 
   /**
    * check to see of a participant exists
-   * TODO(godsflaw): test me
    *
    * @param  participantAddress   the address of the participant
    * @return                      true if participant exists, false otherwise
@@ -220,7 +218,6 @@ class LibCrucible {
 
   /**
    * get the number of participants/commitments in this crucible
-   * TODO(godsflaw): test me
    *
    * @return                  Number of commitments in crucible
    */
