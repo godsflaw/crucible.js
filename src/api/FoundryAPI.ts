@@ -3,6 +3,7 @@
 import * as _ from 'lodash';
 import Web3 from 'web3';
 
+import { Assertions } from '../assertions';
 import { FoundryWrapper } from '../wrappers';
 import { TransactionReceipt } from 'ethereum-types';
 import { BigNumber, awaitTx } from '../util';
@@ -16,7 +17,8 @@ import { Address, Tx } from '../types/common';
  * makes new Crucibles and tracks them.
  */
 export class FoundryAPI {
-  private address: Address;
+  public address: Address;
+  private assert: Assertions;
   private foundryWrapper: FoundryWrapper;
   private web3: Web3;
 
@@ -28,8 +30,9 @@ export class FoundryAPI {
    *                    library to use for interacting with the Ethereum network
    * @param addr        the address of the foundry contract on the network
    */
-  constructor(web3: Web3, addr: Address) {
+  constructor(web3: Web3, addr: Address, assertions: Assertions) {
     this.web3 = web3;
+    this.assert = assertions;
     this.address = addr;
     this.foundryWrapper = new FoundryWrapper(web3);
   }
@@ -102,13 +105,12 @@ export class FoundryAPI {
    * get a crucible address from the transaction hash passed back from
    * createCrucible()
    *
-   * @param  txHash          the transaction hash from createCrucible()
+   * @param  receipt         TransactionReceipt from a mined transaction
    * @return                 Address of the new crucibe contract
    */
-  public async getCrucibleAddressFromCreateTxHash(
-    txHash: string
+  public async getCrucibleAddressFromReceipt(
+    receipt: TransactionReceipt
   ): Promise<Address> {
-    const receipt: TransactionReceipt = await awaitTx(this.web3, txHash);
     return await this.foundryWrapper.getCrucibleAddressFromReceipt(
       this.address,
       receipt

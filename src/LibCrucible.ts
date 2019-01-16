@@ -3,9 +3,10 @@
 import Web3 from 'web3';
 import { Provider } from 'web3/providers';
 
+import { Assertions } from './assertions';
 import { libCrucibleErrors } from './errors';
 import { FoundryAPI, CrucibleAPI } from './api';
-import { BigNumber, instantiateWeb3 } from './util';
+import { BigNumber, instantiateWeb3, awaitTx } from './util';
 import { Address, TransactionReceipt, Tx } from './types/common';
 
 export interface LibCrucibleConfig {
@@ -23,6 +24,7 @@ export interface LibCrucibleConfig {
  */
 class LibCrucible {
   private web3: Web3;
+  private assertions: Assertions;
   private foundry: FoundryAPI;
   private crucible: CrucibleAPI;
 
@@ -44,7 +46,10 @@ class LibCrucible {
    */
   constructor(provider: Provider, config: LibCrucibleConfig) {
     this.web3 = instantiateWeb3(provider);
-    this.foundry = new FoundryAPI(this.web3, config.foundryAddress);
+    this.assertions = new Assertions(this.web3);
+    this.foundry = new FoundryAPI(
+      this.web3, config.foundryAddress, this.assertions
+    );
     // TODO(godsflaw): implement backend for listing Crucibles
     // this.listings = new ListingAPI(this.web3, this.foundry);
   }
@@ -52,8 +57,6 @@ class LibCrucible {
   /*
    * METHODS IN THE FOUNDRY
    */
-
-  /**
 
   /**
    * Creates a new Crucible
@@ -130,8 +133,9 @@ class LibCrucible {
    * @return                  void (throws on error)
    */
   public async loadCrucibleFromCreateTxHash(txHash: string) {
-    let crucibleAddress = await this.foundry.getCrucibleAddressFromCreateTxHash(
-      txHash
+    const receipt: TransactionReceipt = await this.getTxReceipt(txHash);
+    const crucibleAddress = await this.foundry.getCrucibleAddressFromReceipt(
+      receipt
     );
 
     this.loadCrucibleFromAddress(crucibleAddress);
@@ -144,7 +148,9 @@ class LibCrucible {
    * @return                  void (throws on error)
    */
   public async loadCrucibleFromAddress(crucibleAddress: Address) {
-    this.crucible = new CrucibleAPI(this.web3, crucibleAddress);
+    this.crucible = new CrucibleAPI(
+      this.web3, crucibleAddress, this.assertions
+    );
   }
 
   /**
@@ -154,11 +160,13 @@ class LibCrucible {
    * @return                  void (throws on error)
    */
   public async loadCrucibleFromIndex(index: BigNumber) {
-    let crucibleAddress = await this.foundry.getCrucibleAddressFromIndex(
+    const crucibleAddress = await this.foundry.getCrucibleAddressFromIndex(
       index
     );
 
-    this.crucible = new CrucibleAPI(this.web3, crucibleAddress);
+    this.crucible = new CrucibleAPI(
+      this.web3, crucibleAddress, this.assertions
+    );
   }
 
   /**
@@ -227,6 +235,30 @@ class LibCrucible {
     }
 
     return await this.crucible.getCommitmentCount();
+  }
+
+  /*
+   * UTILITY METHODS
+   */
+
+  /**
+   * wait for and get the TransactionReceipt and return it given the txHash.
+   *
+   * @param  txHash           the transaction hash
+   * @return                  TransactionReceipt from given txHash
+   */
+  public async getTxReceipt(txHash: string): Promise<TransactionReceipt> {
+    return await awaitTx(this.web3, txHash);
+  }
+
+  /**
+   * wait for the given txHash to complete (be mined)
+   *
+   * @param  txHash           the transaction hash
+   * @return                  void (throws on error)
+   */
+  public async waitForTxToComplete(txHash: string) {
+    await this.getTxReceipt(txHash);
   }
 
 }

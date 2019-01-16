@@ -4,5 +4,4 @@
 export const libCrucibleErrors = {
   CRUCIBLE_UNDEFINED: () => 'crucible is udefined, please call ' +
     'loadCrucibleFromCreateTxHash() or loadCrucibleFromAddress() first',
-  TX_VALUE_UNDEFINED: () => 'txOpts.value must be defined',
 };

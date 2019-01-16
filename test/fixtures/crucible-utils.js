@@ -46,13 +46,13 @@ function CrucibleUtils(options) {
   this.zeroAmountWei = this.web3.utils.toWei('0', 'ether');
   this.zeroAmountEth = this.web3.utils.fromWei(this.zeroAmountWei, 'ether');
 
-  this.tooLowAmountWei = this.web3.utils.toWei('0.01', 'ether');
+  this.tooLowAmountWei = this.web3.utils.toWei('0.001', 'ether');
   this.tooLowAmountEth = this.web3.utils.fromWei(this.tooLowAmountWei, 'ether');
 
-  this.minAmountWei = this.web3.utils.toWei('0.25', 'ether');
+  this.minAmountWei = this.web3.utils.toWei('0.005', 'ether');
   this.minAmountEth = this.web3.utils.fromWei(this.minAmountWei, 'ether');
 
-  this.riskAmountWei = this.web3.utils.toWei('0.5', 'ether');
+  this.riskAmountWei = this.web3.utils.toWei('0.01', 'ether');
   this.riskAmountEth = this.web3.utils.fromWei(this.riskAmountWei, 'ether');
 
   this.txOpts = options.txOpts || {

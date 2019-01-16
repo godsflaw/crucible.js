@@ -27,7 +27,7 @@ test('removes an existing crucible', async t => {
   );
 
   try {
-    let beforeCount = await libCrucible.getCrucibleCount();
+    const beforeCount = await libCrucible.getCrucibleCount();
     let txHash = await libCrucible.createCrucible(
       address.oracle,
       address.empty,

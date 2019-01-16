@@ -16,7 +16,7 @@ elif [ "${CRUCIBLE_ENV}" == "staging" ] || \
      [ "${CRUCIBLE_ENV}" == "ropsten" ] || \
      [ "${CRUCIBLE_ENV}" == "kovan" ]; then
   if [ "$#" -eq 0 ]; then
-    CRUCIBLE_ARGS="./test/unit/*/*.js"
+    CRUCIBLE_ARGS="./test/integration/*/*.js"
   else
     CRUCIBLE_ARGS="$@"
   fi

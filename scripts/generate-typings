@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 rm ./src/types/generated/foundry.ts ./src/types/generated/crucible.ts && \
   npm-run set-abi-gen \
