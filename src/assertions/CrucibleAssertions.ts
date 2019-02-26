@@ -86,4 +86,22 @@ export class CrucibleAssertions {
     }
   }
 
+  public async hasValidParticipantAsync(
+    crucibleAddress: Address,
+    participantAddress: Address
+  ): Promise<void> {
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const participantExists =
+      await crucibleContract.participantExists.callAsync(participantAddress);
+
+    if (participantExists) {
+      throw new Error(crucibleAssertionErrors.PARTICIPANT_EXISTS(
+        participantAddress
+      ));
+    }
+  }
+
 }

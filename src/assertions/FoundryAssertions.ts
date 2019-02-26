@@ -30,17 +30,68 @@ export class FoundryAssertions {
    * the foundry interface
    */
   public async implementsFoundry(foundryAddress: Address): Promise<void> {
-    const foundryContract = await FoundryContract.at(foundryAddress, this.web3, {});
+    const foundryContract = await FoundryContract.at(
+      foundryAddress, this.web3, {}
+    );
 
     try {
       await Promise.all([
         // foundryContract.crucibles.callAsync('0'),
         foundryContract.owner.callAsync(),
-        // foundryContract.getCount.callAsync(),
+        foundryContract.getCount.callAsync(),
         // foundryContract.getIndexOf.callAsync('0'),
       ]);
     } catch (error) {
-      throw new Error(foundryAssertionErrors.MISSING_FOUNDRY_METHOD(foundryAddress));
+      throw new Error(
+        foundryAssertionErrors.MISSING_FOUNDRY_METHOD(foundryAddress)
+      );
+    }
+  }
+
+  public async hasValidOwnerAsync(
+    foundryAddress: Address,
+    fromAddress: Address
+  ): Promise<void> {
+    const foundryContract = await FoundryContract.at(
+      foundryAddress, this.web3, {}
+    );
+
+    const owner = await foundryContract.owner.callAsync();
+
+    if (fromAddress.toLowerCase() !== owner.toLowerCase()) {
+      throw new Error(foundryAssertionErrors.ONLY_OWNER(
+        owner, fromAddress
+      ));
+    }
+  }
+
+  public async hasCruciblesAsync(foundryAddress: Address): Promise<void> {
+    const foundryContract = await FoundryContract.at(
+      foundryAddress, this.web3, {}
+    );
+
+    const crucibles = await foundryContract.getCount.callAsync();
+
+    if (crucibles.lte(0)) {
+      throw new Error(foundryAssertionErrors.HAS_CRUCIBLES(foundryAddress));
+    }
+  }
+
+  public async hasCorrectIndexAsync(
+    foundryAddress: Address,
+    index: BigNumber,
+    addressToDelete: Address
+  ): Promise<void> {
+    const foundryContract = await FoundryContract.at(
+      foundryAddress, this.web3, {}
+    );
+
+    const addressAtIndex = await foundryContract.crucibles.callAsync(index);
+
+    if (addressAtIndex.toLowerCase() !== addressToDelete.toLowerCase()) {
+      throw new Error(foundryAssertionErrors.INDEX_ADDRESS_ERROR(
+        index, addressAtIndex, addressToDelete
+      ));
     }
   }
 

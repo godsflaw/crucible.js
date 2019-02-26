@@ -195,7 +195,36 @@ test.serial('crucible should toss error if value is too low', async t => {
     await libCrucible.addCommitment(address.user3, cu.txOpts);
     t.fail('should have tossed an error');
   } catch (err) {
-    t.pass(err.message);
+    t.is(
+      err.message,
+      'risked amount ' + cu.txOpts.value + ' must be at least ' + cu.minAmountWei,
+      'got correct error message'
+    );
+    let commitments = await libCrucible.getCommitmentCount();
+    t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
+  }
+});
+
+test.serial('addCommitment should throw participantExists error', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.oracle;
+  cu.txOpts.value = cu.riskAmountWei;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
+
+  try {
+    await libCrucible.addCommitment(address.user1, cu.txOpts);
+    t.fail('should have tossed an error');
+  } catch (err) {
+    t.is(
+      err.message,
+      'participant with address ' + address.user1 + ' already exists',
+      'got correct error message'
+    );
     let commitments = await libCrucible.getCommitmentCount();
     t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
   }
@@ -203,6 +232,7 @@ test.serial('crucible should toss error if value is too low', async t => {
 
 test.serial('removes an existing crucible from the foundry', async t => {
   const libCrucible = t.context.libCrucible;
+  const crucibleAddress = t.context.crucibleAddress;
   const cu = t.context.cu;
   const address = t.context.address;
 
@@ -213,7 +243,7 @@ test.serial('removes an existing crucible from the foundry', async t => {
       address.oracle
     );
     const txHash = await libCrucible.deleteCrucibleFromFoundry(
-      libCrucible.crucible.address, cu.txOpts
+      crucibleAddress, cu.txOpts
     );
     t.regex(txHash, /^0x[0-9a-f]+/i, 'got a txHash');
     await libCrucible.waitForTxToComplete(txHash);

@@ -29,6 +29,7 @@ export class FoundryAPI {
    * @param web3        Web3.js Provider instance you would like the crucible.js
    *                    library to use for interacting with the Ethereum network
    * @param addr        the address of the foundry contract on the network
+   * @param assertions  An instance of the Assertion library
    */
   constructor(web3: Web3, addr: Address, assertions: Assertions) {
     this.web3 = web3;
@@ -159,9 +160,40 @@ export class FoundryAPI {
   ): Promise<string> {
     const index = await this.getCrucibleIndexFromAddress(crucibleAddress);
 
+    await this.assertDeleteCrucible(index, crucibleAddress, txOpts);
+
     return await this.foundryWrapper.deleteCrucible(
       this.address, crucibleAddress, index, txOpts
     );
+  }
+
+  /* ============ Private Assertions ============ */
+
+  private async assertDeleteCrucible(
+    index: BigNumber,
+    addressToDelete: Address,
+    txOpts: Tx
+  ) {
+    const fromAddress = txOpts.from;
+
+    this.assert.schema.isValidAddress('fromAddress', fromAddress);
+    this.assert.schema.isValidNumber('index', index);
+    this.assert.schema.isValidAddress('addressToDelete', addressToDelete);
+
+    // make sure the contract we're pointed at is a Foundry
+    await this.assert.foundry.implementsFoundry(this.address);
+
+    await Promise.all([
+      this.assert.foundry.hasValidOwnerAsync(
+        this.address, fromAddress
+      ),
+      this.assert.foundry.hasCruciblesAsync(
+        this.address
+      ),
+      this.assert.foundry.hasCorrectIndexAsync(
+        this.address, index, addressToDelete
+      ),
+    ]);
   }
 
 }

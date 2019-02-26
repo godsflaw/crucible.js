@@ -89,9 +89,18 @@ export class CrucibleAPI {
 
     this.assert.schema.isValidNumber('riskAmount', riskAmount);
     this.assert.schema.isValidAddress('participantAddress', participantAddress);
-    await this.assert.crucible.hasValidRiskAmountAsync(
-      this.address, riskAmount
-    );
+
+    // make sure the contract we're pointed at is a Crucible
+    await this.assert.crucible.implementsCrucible(this.address);
+
+    await Promise.all([
+      this.assert.crucible.hasValidRiskAmountAsync(
+        this.address, riskAmount
+      ),
+      this.assert.crucible.hasValidParticipantAsync(
+        this.address, participantAddress
+      ),
+    ]);
   }
 
 }
