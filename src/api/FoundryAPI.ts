@@ -79,6 +79,10 @@ export class FoundryAPI {
     feeNumerator: BigNumber,
     txOpts: Tx
   ): Promise<string> {
+    await this.assertCreateCrucible(
+      startDate, lockDate, endDate, minAmountWei, timeout, txOpts
+    );
+
     return await this.foundryWrapper.newCrucible(
       this.address,
       validator,
@@ -177,7 +181,7 @@ export class FoundryAPI {
     const fromAddress = txOpts.from;
 
     this.assert.schema.isValidAddress('fromAddress', fromAddress);
-    this.assert.schema.isValidNumber('index', index);
+    this.assert.schema.isValidWholeNumber('index', index);
     this.assert.schema.isValidAddress('addressToDelete', addressToDelete);
 
     // make sure the contract we're pointed at is a Foundry
@@ -194,6 +198,31 @@ export class FoundryAPI {
         this.address, index, addressToDelete
       ),
     ]);
+  }
+
+  private async assertCreateCrucible(
+    startDate: BigNumber,
+    lockDate: BigNumber,
+    endDate: BigNumber,
+    minAmountWei: BigNumber,
+    timeout: BigNumber,
+    txOpts: Tx
+  ) {
+    const fromAddress = txOpts.from;
+
+    this.assert.schema.isValidAddress('fromAddress', fromAddress);
+    this.assert.schema.isValidWholeNumber('startDate', startDate);
+    this.assert.schema.isValidWholeNumber('lockDate', lockDate);
+    this.assert.schema.isValidWholeNumber('endDate', endDate);
+    this.assert.schema.isValidWholeNumber('minAmountWei', minAmountWei);
+    this.assert.schema.isValidWholeNumber('timeout', timeout);
+
+    // make sure the contract we're pointed at is a Foundry
+    await this.assert.foundry.implementsFoundry(this.address);
+
+    this.assert.foundry.hasValidDates(startDate, lockDate, endDate);
+    this.assert.foundry.hasValidTimeout(startDate, endDate, timeout);
+    this.assert.foundry.hasValidMinAmount(minAmountWei);
   }
 
 }

@@ -95,4 +95,46 @@ export class FoundryAssertions {
     }
   }
 
+  public hasValidDates(
+    startDate: BigNumber,
+    lockDate: BigNumber,
+    endDate: BigNumber
+  ): boolean {
+    if (startDate.gte(lockDate)) {
+      throw new Error(
+        foundryAssertionErrors.START_LOCK_DATE(startDate, lockDate)
+      );
+    }
+
+    if (lockDate.gte(endDate)) {
+      throw new Error(
+        foundryAssertionErrors.LOCK_END_DATE(lockDate, endDate)
+      );
+    }
+
+    return true;
+  }
+
+  public hasValidTimeout(
+    startDate: BigNumber,
+    endDate: BigNumber,
+    timeout: BigNumber
+  ): boolean {
+    if (timeout.lt(endDate.minus(startDate))) {
+      throw new Error(
+        foundryAssertionErrors.TIMEOUT_VALUE(endDate.minus(startDate), timeout)
+      );
+    }
+
+    return true;
+  }
+
+  public hasValidMinAmount(minAmountWei: BigNumber): boolean {
+    if (minAmountWei.lte(0)) {
+      throw new Error(foundryAssertionErrors.MINAMOUNT_ZERO());
+    }
+
+    return true;
+  }
+
 }

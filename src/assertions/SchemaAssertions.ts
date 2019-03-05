@@ -29,7 +29,7 @@ export class SchemaAssertions {
     this.assertConformsToSchema(variableName, value, schemas.numberSchema);
   }
 
-  public IsValidWholeNumber(variableName: string, value: any) {
+  public isValidWholeNumber(variableName: string, value: any) {
     this.assertConformsToSchema(variableName, value, schemas.wholeNumberSchema);
   }
 
