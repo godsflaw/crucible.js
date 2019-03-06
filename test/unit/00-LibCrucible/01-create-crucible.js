@@ -52,14 +52,17 @@ test.serial('new crucible startDate must be < lockDate', async t => {
   const libCrucible = t.context.libCrucible;
   const address = t.context.address;
   const cu = t.context.cu;
+  const startDate = cu.startDate();
+  const lockDate = new BigNumber(0);
+  const endDate = cu.endDate();
 
   try {
     const txHash = await libCrucible.createCrucible(
       address.oracle,
       address.empty,
-      cu.startDate(),
-      new BigNumber(0),
-      cu.endDate(),
+      startDate,
+      lockDate,
+      endDate,
       cu.minAmountWei,
       cu.timeout,
       cu.feeNumerator,
@@ -70,7 +73,7 @@ test.serial('new crucible startDate must be < lockDate', async t => {
   } catch (err) {
     t.is(
       err.message,
-      'startDate (' + cu.startDate() + ') must be less than lockDate (0).',
+      'startDate (' + startDate + ') must be less than lockDate (0).',
       'throws error'
     );
   }
@@ -80,14 +83,17 @@ test.serial('new crucible lockDate must be < endDate', async t => {
   const libCrucible = t.context.libCrucible;
   const address = t.context.address;
   const cu = t.context.cu;
+  const startDate = cu.startDate();
+  const lockDate = cu.lockDate();
+  const endDate = new BigNumber(0);
 
   try {
     const txHash = await libCrucible.createCrucible(
       address.oracle,
       address.empty,
-      cu.startDate(),
-      cu.lockDate(),
-      new BigNumber(0),
+      startDate,
+      lockDate,
+      endDate,
       cu.minAmountWei,
       cu.timeout,
       cu.feeNumerator,
@@ -98,7 +104,7 @@ test.serial('new crucible lockDate must be < endDate', async t => {
   } catch (err) {
     t.is(
       err.message,
-      'lockDate (' + cu.lockDate() + ') must be less than endDate (0).',
+      'lockDate (' + lockDate + ') must be less than endDate (0).',
       'throws error'
     );
   }
@@ -108,14 +114,17 @@ test.serial('new crucible timeout must be > (endDate - startDate)', async t => {
   const libCrucible = t.context.libCrucible;
   const address = t.context.address;
   const cu = t.context.cu;
+  const startDate = cu.startDate();
+  const lockDate = cu.lockDate();
+  const endDate = cu.endDate();
 
   try {
     const txHash = await libCrucible.createCrucible(
       address.oracle,
       address.empty,
-      cu.startDate(),
-      cu.lockDate(),
-      cu.endDate(),
+      startDate,
+      lockDate,
+      endDate,
       cu.minAmountWei,
       new BigNumber(1),
       cu.feeNumerator,
@@ -127,8 +136,7 @@ test.serial('new crucible timeout must be > (endDate - startDate)', async t => {
     t.is(
       err.message,
       'timeout (1) must be greater than or equal to the number of seconds ' +
-      'between startDate and endDate (' + cu.endDate().minus(cu.startDate()) +
-      ').',
+      'between startDate and endDate (' + endDate.minus(startDate) + ').',
       'throws error'
     );
   }
