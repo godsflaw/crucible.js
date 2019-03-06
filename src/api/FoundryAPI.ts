@@ -3,6 +3,7 @@
 import * as _ from 'lodash';
 import Web3 from 'web3';
 
+import { Assertions } from '../assertions';
 import { FoundryWrapper } from '../wrappers';
 import { TransactionReceipt } from 'ethereum-types';
 import { BigNumber, awaitTx } from '../util';
@@ -16,7 +17,8 @@ import { Address, Tx } from '../types/common';
  * makes new Crucibles and tracks them.
  */
 export class FoundryAPI {
-  private address: Address;
+  public address: Address;
+  private assert: Assertions;
   private foundryWrapper: FoundryWrapper;
   private web3: Web3;
 
@@ -27,9 +29,11 @@ export class FoundryAPI {
    * @param web3        Web3.js Provider instance you would like the crucible.js
    *                    library to use for interacting with the Ethereum network
    * @param addr        the address of the foundry contract on the network
+   * @param assertions  An instance of the Assertion library
    */
-  constructor(web3: Web3, addr: Address) {
+  constructor(web3: Web3, addr: Address, assertions: Assertions) {
     this.web3 = web3;
+    this.assert = assertions;
     this.address = addr;
     this.foundryWrapper = new FoundryWrapper(web3);
   }
@@ -75,6 +79,10 @@ export class FoundryAPI {
     feeNumerator: BigNumber,
     txOpts: Tx
   ): Promise<string> {
+    await this.assertCreateCrucible(
+      startDate, lockDate, endDate, minAmountWei, timeout, txOpts
+    );
+
     return await this.foundryWrapper.newCrucible(
       this.address,
       validator,
@@ -102,13 +110,12 @@ export class FoundryAPI {
    * get a crucible address from the transaction hash passed back from
    * createCrucible()
    *
-   * @param  txHash          the transaction hash from createCrucible()
+   * @param  receipt         TransactionReceipt from a mined transaction
    * @return                 Address of the new crucibe contract
    */
-  public async getCrucibleAddressFromCreateTxHash(
-    txHash: string
+  public async getCrucibleAddressFromReceipt(
+    receipt: TransactionReceipt
   ): Promise<Address> {
-    const receipt: TransactionReceipt = await awaitTx(this.web3, txHash);
     return await this.foundryWrapper.getCrucibleAddressFromReceipt(
       this.address,
       receipt
@@ -157,9 +164,65 @@ export class FoundryAPI {
   ): Promise<string> {
     const index = await this.getCrucibleIndexFromAddress(crucibleAddress);
 
+    await this.assertDeleteCrucible(index, crucibleAddress, txOpts);
+
     return await this.foundryWrapper.deleteCrucible(
       this.address, crucibleAddress, index, txOpts
     );
+  }
+
+  /* ============ Private Assertions ============ */
+
+  private async assertDeleteCrucible(
+    index: BigNumber,
+    addressToDelete: Address,
+    txOpts: Tx
+  ) {
+    const fromAddress = txOpts.from;
+
+    this.assert.schema.isValidAddress('fromAddress', fromAddress);
+    this.assert.schema.isValidWholeNumber('index', index);
+    this.assert.schema.isValidAddress('addressToDelete', addressToDelete);
+
+    // make sure the contract we're pointed at is a Foundry
+    await this.assert.foundry.implementsFoundry(this.address);
+
+    await Promise.all([
+      this.assert.foundry.hasValidOwnerAsync(
+        this.address, fromAddress
+      ),
+      this.assert.foundry.hasCruciblesAsync(
+        this.address
+      ),
+      this.assert.foundry.hasCorrectIndexAsync(
+        this.address, index, addressToDelete
+      ),
+    ]);
+  }
+
+  private async assertCreateCrucible(
+    startDate: BigNumber,
+    lockDate: BigNumber,
+    endDate: BigNumber,
+    minAmountWei: BigNumber,
+    timeout: BigNumber,
+    txOpts: Tx
+  ) {
+    const fromAddress = txOpts.from;
+
+    this.assert.schema.isValidAddress('fromAddress', fromAddress);
+    this.assert.schema.isValidWholeNumber('startDate', startDate);
+    this.assert.schema.isValidWholeNumber('lockDate', lockDate);
+    this.assert.schema.isValidWholeNumber('endDate', endDate);
+    this.assert.schema.isValidWholeNumber('minAmountWei', minAmountWei);
+    this.assert.schema.isValidWholeNumber('timeout', timeout);
+
+    // make sure the contract we're pointed at is a Foundry
+    await this.assert.foundry.implementsFoundry(this.address);
+
+    this.assert.foundry.hasValidDates(startDate, lockDate, endDate);
+    this.assert.foundry.hasValidTimeout(startDate, endDate, timeout);
+    this.assert.foundry.hasValidMinAmount(minAmountWei);
   }
 
 }

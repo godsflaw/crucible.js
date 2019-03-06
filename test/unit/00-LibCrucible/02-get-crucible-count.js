@@ -27,7 +27,7 @@ test('returns correct amount of crucibles', async t => {
   );
 
   try {
-    let beforeCount = await libCrucible.getCrucibleCount();
+    const beforeCount = await libCrucible.getCrucibleCount();
     const txHash = await libCrucible.createCrucible(
       address.oracle,
       address.empty,
@@ -40,7 +40,7 @@ test('returns correct amount of crucibles', async t => {
       cu.txOpts
     );
     await libCrucible.loadCrucibleFromCreateTxHash(txHash);
-    let afterCount = await libCrucible.getCrucibleCount();
+    const afterCount = await libCrucible.getCrucibleCount();
     t.truthy(afterCount.isGreaterThan(beforeCount), 'crucible count grew');
   } catch (err) {
     t.fail(err.message);

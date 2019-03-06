@@ -40,20 +40,24 @@ function CrucibleUtils(options) {
   this.txGasCostBase = options.txGasCostBase || 2100000000000000;
   this.gasScale = options.gasScale || 100000000000;
   this.gasStipend = options.gasStipend || 2300;
-  this.timeout = options.timeout || 691200;
+  this.timeout = options.timeout || new BigNumber('691200');
   this.feeNumerator = options.feeNumerator || 100;
 
-  this.zeroAmountWei = this.web3.utils.toWei('0', 'ether');
-  this.zeroAmountEth = this.web3.utils.fromWei(this.zeroAmountWei, 'ether');
+  this._zeroAmountWei = this.web3.utils.toWei('0', 'ether');
+  this.zeroAmountWei = new BigNumber(this._zeroAmountWei);
+  this.zeroAmountEth = this.web3.utils.fromWei(this._zeroAmountWei, 'ether');
 
-  this.tooLowAmountWei = this.web3.utils.toWei('0.01', 'ether');
-  this.tooLowAmountEth = this.web3.utils.fromWei(this.tooLowAmountWei, 'ether');
+  this._tooLowAmountWei = this.web3.utils.toWei('0.001', 'ether');
+  this.tooLowAmountWei = new BigNumber(this._tooLowAmountWei);
+  this.tooLowAmountEth = this.web3.utils.fromWei(this._tooLowAmountWei, 'ether');
 
-  this.minAmountWei = this.web3.utils.toWei('0.25', 'ether');
-  this.minAmountEth = this.web3.utils.fromWei(this.minAmountWei, 'ether');
+  this._minAmountWei = this.web3.utils.toWei('0.005', 'ether');
+  this.minAmountWei = new BigNumber(this._minAmountWei);
+  this.minAmountEth = this.web3.utils.fromWei(this._minAmountWei, 'ether');
 
-  this.riskAmountWei = this.web3.utils.toWei('0.5', 'ether');
-  this.riskAmountEth = this.web3.utils.fromWei(this.riskAmountWei, 'ether');
+  this._riskAmountWei = this.web3.utils.toWei('0.01', 'ether');
+  this.riskAmountWei = new BigNumber(this._riskAmountWei);
+  this.riskAmountEth = this.web3.utils.fromWei(this._riskAmountWei, 'ether');
 
   this.txOpts = options.txOpts || {
     from: this.address.oracle,
@@ -79,19 +83,25 @@ CrucibleUtils.prototype.addSeconds = function (date, seconds) {
 // default: now
 CrucibleUtils.prototype.startDate = function (secondsFromNow) {
   if (secondsFromNow === undefined) { secondsFromNow = (86400 * 0) }
-  return Math.floor(this.addSeconds(Date.now(), secondsFromNow) / 1000);
+  return new BigNumber(
+    Math.floor(this.addSeconds(Date.now(), secondsFromNow) / 1000)
+  );
 };
 
 // default: 1 day from now
 CrucibleUtils.prototype.lockDate = function (secondsFromNow) {
   if (secondsFromNow === undefined) { secondsFromNow = (86400 * 1) }
-  return Math.floor(this.addSeconds(Date.now(), secondsFromNow) / 1000);
+  return new BigNumber(
+    Math.floor(this.addSeconds(Date.now(), secondsFromNow) / 1000)
+  );
 };
 
 // default: 8 days from now
 CrucibleUtils.prototype.endDate = function (secondsFromNow) {
   if (secondsFromNow === undefined) { secondsFromNow = (86400 * 8) }
-  return Math.floor(this.addSeconds(Date.now(), secondsFromNow) / 1000);
+  return new BigNumber(
+    Math.floor(this.addSeconds(Date.now(), secondsFromNow) / 1000)
+  );
 };
 
 CrucibleUtils.prototype.getGoalState = function (_state) {
@@ -247,7 +257,7 @@ CrucibleUtils.prototype.loadOrCreateCrucible = async function (context) {
     );
     await context.libCrucible.loadCrucibleFromCreateTxHash(txHash);
   } else {
-    await context.libCrucible.loadCrucibleFromIndex(new BigNumber(0));
+    await context.libCrucible.loadCrucibleFromIndex(new BigNumber('0'));
   }
 };
 

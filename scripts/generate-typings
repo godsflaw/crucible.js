@@ -1,6 +1,6 @@
-#!/bin/sh -x
+#!/bin/sh
 
-rm ./src/types/generated/foundry.ts ./src/types/generated/crucible.ts && \
+rm -f ./src/types/generated/foundry.ts ./src/types/generated/crucible.ts && \
   npm-run set-abi-gen \
     --abis './node_modules/@godsflaw/crucible/build/contracts/@(Foundry|Crucible).json' \
     --out './src/types/generated' \
