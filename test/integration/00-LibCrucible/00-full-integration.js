@@ -197,7 +197,8 @@ test.serial('crucible should toss error if value is too low', async t => {
   } catch (err) {
     t.is(
       err.message,
-      'risked amount ' + cu.txOpts.value + ' must be at least ' + cu.minAmountWei,
+      'Risked amount ' + cu.tooLowAmountWei + ' must be at least ' +
+        cu.minAmountWei + '.',
       'got correct error message'
     );
     let commitments = await libCrucible.getCommitmentCount();
@@ -221,8 +222,8 @@ test.serial('addCommitment should throw participantExists error', async t => {
     t.fail('should have tossed an error');
   } catch (err) {
     t.is(
-      err.message,
-      'participant with address ' + address.user1 + ' already exists',
+      err.message.toLowerCase(),
+      'participant with address ' + address.user1 + ' already exists.',
       'got correct error message'
     );
     let commitments = await libCrucible.getCommitmentCount();

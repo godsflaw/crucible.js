@@ -127,7 +127,37 @@ test.serial('crucible should toss error if value is too low', async t => {
     await libCrucible.addCommitment(address.user3, cu.txOpts);
     t.fail('should have tossed an error');
   } catch (err) {
-    t.pass(err.message);
+    t.is(
+      err.message,
+      'Risked amount ' + cu.tooLowAmountWei + ' must be at least ' +
+        cu.minAmountWei + '.',
+      'throws error'
+    );
+    let commitments = await libCrucible.getCommitmentCount();
+    t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
+  }
+});
+
+test.serial('crucible should error with PARTICIPANT_EXISTS', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.user2;
+  cu.txOpts.value = cu.riskAmountWei;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.user2
+  );
+
+  try {
+    await libCrucible.addCommitment(address.user2, cu.txOpts);
+    t.fail('should have tossed an error');
+  } catch (err) {
+    t.is(
+      err.message.toLowerCase(),
+      'participant with address ' + address.user2 + ' already exists.',
+      'throws error'
+    );
     let commitments = await libCrucible.getCommitmentCount();
     t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
   }
