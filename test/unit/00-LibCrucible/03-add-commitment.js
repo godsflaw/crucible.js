@@ -22,7 +22,7 @@ test.before(async t => {
       t.context.address.oracle,
       t.context.address.empty,
       t.context.cu.startDate(),
-      t.context.cu.lockDate(),
+      t.context.cu.lockDate(5),
       t.context.cu.endDate(),
       t.context.cu.minAmountWei,
       t.context.cu.timeout,
@@ -156,6 +156,34 @@ test.serial('crucible should error with PARTICIPANT_EXISTS', async t => {
     t.is(
       err.message.toLowerCase(),
       'participant with address ' + address.user2 + ' already exists.',
+      'throws error'
+    );
+    let commitments = await libCrucible.getCommitmentCount();
+    t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
+  }
+});
+
+test.serial('crucible must be in LOCKED state', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.user3;
+  cu.txOpts.value = cu.riskAmountWei;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.user3
+  );
+
+  try {
+    await cu.sleep(5000);
+    const txHash = await libCrucible.lock();
+    await libCrucible.waitForTxToComplete(txHash);
+    await libCrucible.addCommitment(address.user3, cu.txOpts);
+    t.fail('should have tossed an error');
+  } catch (err) {
+    t.is(
+      err.message,
+      'The current state is LOCKED but must be OPEN.',
       'throws error'
     );
     let commitments = await libCrucible.getCommitmentCount();

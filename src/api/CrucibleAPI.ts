@@ -7,8 +7,13 @@ import { Assertions } from '../assertions';
 import { libCrucibleErrors } from '../errors';
 import { CrucibleWrapper } from '../wrappers';
 import { TransactionReceipt } from 'ethereum-types';
-import { BigNumber, awaitTx } from '../util';
-import { Address, Tx } from '../types/common';
+import { Address, Tx, CrucibleState } from '../types/common';
+import {
+  awaitTx,
+  BigNumber,
+  crucibleNumberToState,
+  crucibleStateToString
+} from '../util';
 
 /**
  * @title CrucibleAPI
@@ -53,11 +58,27 @@ export class CrucibleAPI {
     participantAddress: Address,
     txOpts: Tx
   ): Promise<string> {
-    await this.assertAddCommitment(participantAddress, txOpts);
+    await this.assertAddCommitment(
+      CrucibleState.OPEN, participantAddress, txOpts
+    );
 
     return await this.crucibleWrapper.add(
       this.address, participantAddress, txOpts
     );
+  }
+
+  /**
+   * Used to lock the crucible.  This action prevents more commitments
+   * from being added, and usually indicates the active period of the crucuble.
+   *
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async lock(txOpts: Tx): Promise<string> {
+    await this.assertCanLock(CrucibleState.OPEN, txOpts);
+
+    return await this.crucibleWrapper.lock(this.address, txOpts);
   }
 
   /**
@@ -75,16 +96,32 @@ export class CrucibleAPI {
    * @param  participantAddress   the address of the participant
    * @return                      true if participant exists, false otherwise
    */
-  public async participantExists(participantAddress: Address): Promise<boolean> {
+  public async participantExists(
+    participantAddress: Address
+  ): Promise<boolean> {
     return await this.crucibleWrapper.participantExists(
       this.address,
       participantAddress
     );
   }
 
+  /**
+   * Gets current state of the crucible
+   *
+   * @return                      the current state
+   */
+  public async getState(): Promise<string> {
+    const stateNum = await this.crucibleWrapper.state(this.address);
+    return crucibleStateToString(crucibleNumberToState(stateNum));
+  }
+
   /* ============ Private Assertions ============ */
 
-  private async assertAddCommitment(participantAddress: Address, txOpts: Tx) {
+  private async assertAddCommitment(
+    inState: CrucibleState,
+    participantAddress: Address,
+    txOpts: Tx
+  ) {
     const riskAmount = new BigNumber(txOpts.value);
 
     this.assert.schema.isValidNumber('riskAmount', riskAmount);
@@ -94,12 +131,22 @@ export class CrucibleAPI {
     await this.assert.crucible.implementsCrucible(this.address);
 
     await Promise.all([
+      this.assert.crucible.inState(this.address, inState),
       this.assert.crucible.hasValidRiskAmountAsync(
         this.address, riskAmount
       ),
       this.assert.crucible.hasValidParticipantAsync(
         this.address, participantAddress
       ),
+    ]);
+  }
+
+  private async assertCanLock(inState: CrucibleState, txOpts: Tx) {
+    // make sure the contract we're pointed at is a Crucible
+    await this.assert.crucible.implementsCrucible(this.address);
+    await Promise.all([
+      this.assert.crucible.inState(this.address, inState),
+      this.assert.crucible.pastLockTime(this.address),
     ]);
   }
 

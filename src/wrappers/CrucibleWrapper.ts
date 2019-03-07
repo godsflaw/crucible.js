@@ -77,4 +77,31 @@ export class CrucibleWrapper {
       participantAddress
     );
   }
+
+  /**
+   * Gets the current state of the crucible contract
+   *
+   * @param  crucibleAddress      The address of the crucible contract
+   * @return                      the current state
+   */
+  public async state(crucibleAddress: Address): Promise<BigNumber> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+
+    return await crucibleInstance.state.callAsync();
+  }
+
+  /**
+   * lock the crucible
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async lock(crucibleAddress: Address, txOpts: Tx): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.lock.sendTransactionAsync(txOptions);
+  }
 }

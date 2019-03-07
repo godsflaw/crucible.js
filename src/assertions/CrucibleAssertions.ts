@@ -2,11 +2,16 @@
 
 import Web3 from 'web3';
 
-import { Address } from '../types/common';
+import { Address, CrucibleState } from '../types/common';
 import { CrucibleContract } from '../types/generated';
 import { NULL_ADDRESS } from '../constants';
 import { crucibleAssertionErrors } from '../errors';
-import { BigNumber } from '../util';
+import {
+  BigNumber,
+  crucibleNumberToState,
+  crucibleStateToString,
+  now
+} from '../util';
 
 /**
  * @title  CrucibleAssertions
@@ -100,6 +105,39 @@ export class CrucibleAssertions {
     if (participantExists) {
       throw new Error(crucibleAssertionErrors.PARTICIPANT_EXISTS(
         participantAddress
+      ));
+    }
+  }
+
+  public async inState(
+    crucibleAddress: Address,
+    state: CrucibleState
+  ): Promise<void> {
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const currentState = await crucibleContract.state.callAsync();
+
+    if (state !== currentState.toNumber()) {
+      throw new Error(crucibleAssertionErrors.STATE_MISMATCH(
+        crucibleStateToString(state),
+        crucibleStateToString(crucibleNumberToState(currentState)),
+      ));
+    }
+  }
+
+  public async pastLockTime(crucibleAddress: Address): Promise<void> {
+    const rightNow = now();
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const lockDate = await crucibleContract.lockDate.callAsync();
+
+    if (!lockDate.lte(rightNow)) {
+      throw new Error(crucibleAssertionErrors.NOT_PAST_LOCK_DATE(
+        rightNow, lockDate
       ));
     }
   }

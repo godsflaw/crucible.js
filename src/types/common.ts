@@ -13,20 +13,20 @@ export interface Component {
   unit: BigNumber;
 }
 
-export const GoalState = {
-  WAITING: new BigNumber(1),
-  PASS: new BigNumber(2),
-  FAIL: new BigNumber(3),
+export enum GoalState {
+  WAITING = 0,
+  PASS    = 1,
+  FAIL    = 2
 };
 
-export const CrucibleState = {
-  OPEN: new BigNumber(1),
-  LOCKED: new BigNumber(2),
-  JUDGEMENT: new BigNumber(3),
-  FINISHED: new BigNumber(4),
-  PAID: new BigNumber(5),
-  BROKEN: new BigNumber(6),
-  KILLED: new BigNumber(7),
+export enum CrucibleState {
+  OPEN      = 0,
+  LOCKED    = 1,
+  JUDGEMENT = 2,
+  FINISHED  = 3,
+  PAID      = 4,
+  BROKEN    = 5,
+  KILLED    = 6
 };
 
 export interface JSONRPCRequestPayload {

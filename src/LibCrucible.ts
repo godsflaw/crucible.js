@@ -209,6 +209,22 @@ class LibCrucible {
   }
 
   /**
+   * Used to lock the crucible.  This action prevents more commitments
+   * from being added, and usually indicates the active period of the crucuble.
+   *
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  private async lock(txOpts: Tx): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.lock(txOpts);
+  }
+
+  /**
    * check to see of a participant exists
    *
    * @param  participantAddress   the address of the participant
@@ -222,6 +238,19 @@ class LibCrucible {
     }
 
     return await this.crucible.participantExists(participantAddress);
+  }
+
+  /**
+   * check to see of a participant exists
+   *
+   * @return                      the current state
+   */
+  public async getState(): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.getState();
   }
 
   /**
