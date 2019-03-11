@@ -1,5 +1,39 @@
 import { BigNumber } from '../util';
-import { CrucibleState } from '../types/common';
+import { CrucibleState, GoalState } from '../types/common';
+
+export function crucibleNumberToGoal(state: BigNumber): GoalState {
+  let result: GoalState;
+
+  switch(state.toNumber()) {
+    case 1:
+      result = GoalState.PASS;
+      break;
+    case 2:
+      result = GoalState.FAIL;
+      break;
+    default:
+      result = GoalState.WAITING;
+  }
+
+  return result;
+}
+
+export function goalStateToString(state: GoalState): string {
+  let goalStr: string;
+
+  switch(state) {
+    case GoalState.PASS:
+      goalStr = 'PASS';
+      break;
+    case GoalState.FAIL:
+      goalStr = 'FAIL';
+      break;
+    default:
+      goalStr = 'WAITING';
+  }
+
+  return goalStr;
+}
 
 export function crucibleStateToString(state: CrucibleState): string {
   let stateStr: string;

@@ -6,8 +6,12 @@ import { Provider } from 'web3/providers';
 import { Assertions } from './assertions';
 import { libCrucibleErrors } from './errors';
 import { FoundryAPI, CrucibleAPI } from './api';
-import { BigNumber, instantiateWeb3, awaitTx } from './util';
-import { Address, TransactionReceipt, Tx } from './types/common';
+import { Address, Commitment, TransactionReceipt, Tx } from './types/common';
+import {
+  awaitTx,
+  BigNumber,
+  instantiateWeb3
+} from './util';
 
 export interface LibCrucibleConfig {
   foundryAddress: Address;
@@ -55,7 +59,7 @@ class LibCrucible {
   }
 
   /*
-   * METHODS IN THE FOUNDRY
+   * METHODS ON THE FOUNDRY
    */
 
   /**
@@ -209,6 +213,27 @@ class LibCrucible {
   }
 
   /**
+   * Used to indicate of a participant has met a goal or not.
+   *
+   * @param  participantAddress   the address of the participant
+   * @param  metGoal              boolean true = met goal, false = not met goal
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  private async setGoal(
+    participantAddress: Address,
+    metGoal: boolean,
+    txOpts: Tx
+  ): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.setGoal(participantAddress, metGoal, txOpts);
+  }
+
+  /**
    * Used to lock the crucible.  This action prevents more commitments
    * from being added, and usually indicates the active period of the crucuble.
    *
@@ -222,6 +247,23 @@ class LibCrucible {
     }
 
     return await this.crucible.lock(txOpts);
+  }
+
+  /**
+   * Used to put the crucible into the JUDGEMENT state.  This action is done
+   * to allow the oracle a period of time to setGoal before moving to the
+   * FINISHED state where payouts can occur.
+   *
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  private async judgement(txOpts: Tx): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.judgement(txOpts);
   }
 
   /**
@@ -264,6 +306,20 @@ class LibCrucible {
     }
 
     return await this.crucible.getCommitmentCount();
+  }
+
+  /**
+   * Gets the commitment of a participant.
+   *
+   * @param  participantAddress the address of the participan
+   * @return                    Commitment of the given participant
+   */
+  public async getCommitment(participantAddress: Address): Promise<Commitment> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.getCommitment(participantAddress);
   }
 
   /*
