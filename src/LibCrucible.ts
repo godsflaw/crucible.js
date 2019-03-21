@@ -182,7 +182,7 @@ class LibCrucible {
    *                          signer, gas, and gasPrice data
    * @return                  Transaction hash
    */
-  private async deleteCrucibleFromFoundry(
+  public async deleteCrucibleFromFoundry(
     crucibleAddress: Address,
     txOpts: Tx
   ): Promise<string> {
@@ -202,7 +202,7 @@ class LibCrucible {
    *                              `Tx` with signer, gas, and gasPrice data
    * @return                      Transaction hash
    */
-  private async addCommitment(
+  public async addCommitment(
     participantAddress: Address,
     txOpts: Tx
   ): Promise<string> {
@@ -222,7 +222,7 @@ class LibCrucible {
    *                              `Tx` with signer, gas, and gasPrice data
    * @return                      Transaction hash
    */
-  private async setGoal(
+  public async setGoal(
     participantAddress: Address,
     metGoal: boolean,
     txOpts: Tx
@@ -242,7 +242,7 @@ class LibCrucible {
    *                              `Tx` with signer, gas, and gasPrice data
    * @return                      Transaction hash
    */
-  private async lock(txOpts: Tx): Promise<string> {
+  public async lock(txOpts: Tx): Promise<string> {
     if (this.crucible === undefined) {
       throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
     }
@@ -259,7 +259,7 @@ class LibCrucible {
    *                              `Tx` with signer, gas, and gasPrice data
    * @return                      Transaction hash
    */
-  private async judgement(txOpts: Tx): Promise<string> {
+  public async judgement(txOpts: Tx): Promise<string> {
     if (this.crucible === undefined) {
       throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
     }

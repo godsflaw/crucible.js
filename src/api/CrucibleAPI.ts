@@ -146,7 +146,7 @@ export class CrucibleAPI {
 
     let commitment: Commitment = {
       exists: result[0],
-      amount: result[1],
+      amount: new BigNumber(result[1]),
       metGoal: crucibleNumberToGoal(result[2])
     };
 

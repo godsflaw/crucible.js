@@ -282,6 +282,96 @@ test.serial('crucible should toss error if in LOCKED state', async t => {
   }
 });
 
+test.serial('toss error if setting a goal for a non-existant participant', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.oracle;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
+
+  try {
+    await libCrucible.setGoal(address.user3, true, cu.txOpts);
+    t.fail('should have tossed an error');
+  } catch (err) {
+    t.is(
+      err.message,
+      'Participant with address ' + address.user3 + ' doesn\'t exist.',
+      'throws error'
+    );
+  }
+});
+
+test.serial('can setGoal in the locked state', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.oracle;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
+
+  try {
+    // check and set goal for user1
+    let goal = await libCrucible.getGoalState(address.user1);
+    t.is(goal, 'WAITING', 'got the correct goal');
+    let txHash = await libCrucible.setGoal(address.user1, false, cu.txOpts);
+    await libCrucible.waitForTxToComplete(txHash);
+    goal = await libCrucible.getGoalState(address.user1);
+    t.is(goal, 'FAIL', 'got the correct goal');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test.serial('can change state to judgement state', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.oracle;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
+
+  try {
+    // change and check crucible state
+    await cu.sleep(5000);
+    let txHash = await libCrucible.judgement(cu.txOpts);
+    await libCrucible.waitForTxToComplete(txHash);
+    let state = await libCrucible.getState();
+    t.is(state, 'JUDGEMENT', 'got the correct state');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test.serial('can setGoal in the judgement state', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.oracle;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
+
+  try {
+    // check and set goal for user2
+    let goal = await libCrucible.getGoalState(address.user2);
+    t.is(goal, 'WAITING', 'got the correct goal');
+    let txHash = await libCrucible.setGoal(address.user2, true, cu.txOpts);
+    await libCrucible.waitForTxToComplete(txHash);
+    goal = await libCrucible.getGoalState(address.user2);
+    t.is(goal, 'PASS', 'got the correct goal');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
 test.serial('removes an existing crucible from the foundry', async t => {
   const libCrucible = t.context.libCrucible;
   const crucibleAddress = t.context.crucibleAddress;

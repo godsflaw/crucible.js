@@ -41,6 +41,11 @@ test.beforeEach(async t => {
       t.context.address.user1, t.context.cu.txOpts
     );
     txHash = await t.context.libCrucible.waitForTxToComplete(txHash);
+    let commitAmount =
+      await t.context.libCrucible.getCommitAmount(t.context.address.user1);
+    t.deepEqual(
+      commitAmount, t.context.cu.riskAmountWei, 'commit amount correct'
+    );
 
     // add participant user2
     t.context.cu.txOpts.from = t.context.address.user2;
@@ -53,6 +58,11 @@ test.beforeEach(async t => {
       t.context.address.user2, t.context.cu.txOpts
     );
     await t.context.libCrucible.waitForTxToComplete(txHash);
+    commitAmount =
+      await t.context.libCrucible.getCommitAmount(t.context.address.user2);
+    t.deepEqual(
+      commitAmount, t.context.cu.riskAmountWei, 'commit amount correct'
+    );
 
     t.context.cu.txOpts.value = undefined;
     t.context.cu.txOpts.from = t.context.address.oracle;

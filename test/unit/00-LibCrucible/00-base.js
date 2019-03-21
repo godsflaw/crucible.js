@@ -165,6 +165,36 @@ test('has getCommitmentCount', async t => {
   }
 });
 
+test('has getCommitment', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getCommitment, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has getGoalState', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getGoalState, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has getCommitAmount', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getCommitAmount, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
 test('has getTxReceipt', async t => {
   const libCrucible = t.context.libCrucible;
 
