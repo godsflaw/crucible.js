@@ -6,8 +6,13 @@ import { Provider } from 'web3/providers';
 import { Assertions } from './assertions';
 import { libCrucibleErrors } from './errors';
 import { FoundryAPI, CrucibleAPI } from './api';
-import { BigNumber, instantiateWeb3, awaitTx } from './util';
-import { Address, TransactionReceipt, Tx } from './types/common';
+import { Address, Commitment, TransactionReceipt, Tx } from './types/common';
+import {
+  awaitTx,
+  BigNumber,
+  goalStateToString,
+  instantiateWeb3
+} from './util';
 
 export interface LibCrucibleConfig {
   foundryAddress: Address;
@@ -55,7 +60,7 @@ class LibCrucible {
   }
 
   /*
-   * METHODS IN THE FOUNDRY
+   * METHODS ON THE FOUNDRY
    */
 
   /**
@@ -177,7 +182,7 @@ class LibCrucible {
    *                          signer, gas, and gasPrice data
    * @return                  Transaction hash
    */
-  private async deleteCrucibleFromFoundry(
+  public async deleteCrucibleFromFoundry(
     crucibleAddress: Address,
     txOpts: Tx
   ): Promise<string> {
@@ -197,7 +202,7 @@ class LibCrucible {
    *                              `Tx` with signer, gas, and gasPrice data
    * @return                      Transaction hash
    */
-  private async addCommitment(
+  public async addCommitment(
     participantAddress: Address,
     txOpts: Tx
   ): Promise<string> {
@@ -209,6 +214,27 @@ class LibCrucible {
   }
 
   /**
+   * Used to indicate of a participant has met a goal or not.
+   *
+   * @param  participantAddress   the address of the participant
+   * @param  metGoal              boolean true = met goal, false = not met goal
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async setGoal(
+    participantAddress: Address,
+    metGoal: boolean,
+    txOpts: Tx
+  ): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.setGoal(participantAddress, metGoal, txOpts);
+  }
+
+  /**
    * Used to lock the crucible.  This action prevents more commitments
    * from being added, and usually indicates the active period of the crucuble.
    *
@@ -216,12 +242,29 @@ class LibCrucible {
    *                              `Tx` with signer, gas, and gasPrice data
    * @return                      Transaction hash
    */
-  private async lock(txOpts: Tx): Promise<string> {
+  public async lock(txOpts: Tx): Promise<string> {
     if (this.crucible === undefined) {
       throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
     }
 
     return await this.crucible.lock(txOpts);
+  }
+
+  /**
+   * Used to put the crucible into the JUDGEMENT state.  This action is done
+   * to allow the oracle a period of time to setGoal before moving to the
+   * FINISHED state where payouts can occur.
+   *
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async judgement(txOpts: Tx): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.judgement(txOpts);
   }
 
   /**
@@ -241,7 +284,7 @@ class LibCrucible {
   }
 
   /**
-   * check to see of a participant exists
+   * get the current crucible state
    *
    * @return                      the current state
    */
@@ -264,6 +307,52 @@ class LibCrucible {
     }
 
     return await this.crucible.getCommitmentCount();
+  }
+
+  /**
+   * Gets the commitment of a participant.
+   *
+   * @param  participantAddress the address of the participan
+   * @return                    Commitment of the given participant
+   */
+  public async getCommitment(participantAddress: Address): Promise<Commitment> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.getCommitment(participantAddress);
+  }
+
+  /**
+   * Gets the goal state for the participant.
+   *
+   * @param  participantAddress the address of the participan
+   * @return                    goal state of a participant
+   */
+  public async getGoalState(participantAddress: Address): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    let commitment = await this.getCommitment(participantAddress);
+
+    return goalStateToString(commitment.metGoal);
+  }
+
+  /**
+   * Gets the commitment amount for the participant.
+   *
+   * @param  participantAddress the address of the participan
+   * @return                    goal state of a participant
+   */
+  public async getCommitAmount(participantAddress: Address): Promise<BigNumber> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    let commitment = await this.getCommitment(participantAddress);
+
+    return commitment.amount;
   }
 
   /*

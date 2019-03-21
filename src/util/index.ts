@@ -7,6 +7,8 @@ export { awaitTx, generateTxOpts } from './transactionUtils';
 
 export {
   now,
+  crucibleNumberToGoal,
   crucibleNumberToState,
-  crucibleStateToString
+  crucibleStateToString,
+  goalStateToString
 } from './crucibleUtils';

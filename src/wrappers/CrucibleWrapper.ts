@@ -49,6 +49,32 @@ export class CrucibleWrapper {
   }
 
   /**
+   * Set the goal as met or not for a given participant.
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  participantAddress The address of the participant to setGoal for
+   * @param  metGoal            boolean true = met goal, false = not met goal
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async setGoal(
+    crucibleAddress: Address,
+    participantAddress: Address,
+    metGoal: boolean,
+    txOpts: Tx
+  ): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.setGoal.sendTransactionAsync(
+      participantAddress,
+      metGoal,
+      txOptions
+    );
+  }
+
+  /**
    * Gets the number of participants/commitments in this crucible
    *
    * @param  crucibleAddress      The address of the crucible contract
@@ -58,6 +84,22 @@ export class CrucibleWrapper {
     const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
 
     return await crucibleInstance.count.callAsync();
+  }
+
+  /**
+   * Gets the number of participants/commitments in this crucible
+   *
+   * @param  crucibleAddress      The address of the crucible contract
+   * @param  participantAddress   the address of the participant
+   * @return                      Array of commitment values
+   */
+  public async commitments(
+    crucibleAddress: Address,
+    participantAddress: Address
+  ): Promise<[boolean, BigNumber, BigNumber]> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+
+    return await crucibleInstance.commitments.callAsync(participantAddress);
   }
 
   /**
@@ -103,5 +145,65 @@ export class CrucibleWrapper {
     const txOptions = await generateTxOpts(this.web3, txOpts);
 
     return await crucibleInstance.lock.sendTransactionAsync(txOptions);
+  }
+
+  /**
+   * move crucible into the judgement state
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async judgement(crucibleAddress: Address, txOpts: Tx): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.judgement.sendTransactionAsync(txOptions);
+  }
+
+  /**
+   * move crucible into the finished state
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async finish(crucibleAddress: Address, txOpts: Tx): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.finish.sendTransactionAsync(txOptions);
+  }
+
+  /**
+   * move crucible into the paid state
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async paid(crucibleAddress: Address, txOpts: Tx): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.paid.sendTransactionAsync(txOptions);
+  }
+
+  /**
+   * move crucible into the broken state
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async broken(crucibleAddress: Address, txOpts: Tx): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.broken.sendTransactionAsync(txOptions);
   }
 }

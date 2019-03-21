@@ -7,12 +7,14 @@ import { Assertions } from '../assertions';
 import { libCrucibleErrors } from '../errors';
 import { CrucibleWrapper } from '../wrappers';
 import { TransactionReceipt } from 'ethereum-types';
-import { Address, Tx, CrucibleState } from '../types/common';
+import { Address, Commitment, Tx, CrucibleState } from '../types/common';
 import {
   awaitTx,
   BigNumber,
+  crucibleNumberToGoal,
   crucibleNumberToState,
-  crucibleStateToString
+  crucibleStateToString,
+  goalStateToString
 } from '../util';
 
 /**
@@ -68,6 +70,31 @@ export class CrucibleAPI {
   }
 
   /**
+   * Used to indicate of a participant has met a goal or not.
+   *
+   * @param  participantAddress   the address of the participant
+   * @param  metGoal              boolean true = met goal, false = not met goal
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async setGoal(
+    participantAddress: Address,
+    metGoal: boolean,
+    txOpts: Tx
+  ): Promise<string> {
+    await this.assertSetGoal(
+      [CrucibleState.LOCKED, CrucibleState.JUDGEMENT],
+      participantAddress,
+      txOpts
+    );
+
+    return await this.crucibleWrapper.setGoal(
+      this.address, participantAddress, metGoal, txOpts
+    );
+  }
+
+  /**
    * Used to lock the crucible.  This action prevents more commitments
    * from being added, and usually indicates the active period of the crucuble.
    *
@@ -76,9 +103,24 @@ export class CrucibleAPI {
    * @return                      Transaction hash
    */
   public async lock(txOpts: Tx): Promise<string> {
-    await this.assertCanLock(CrucibleState.OPEN, txOpts);
+    await this.assertCanLockState(CrucibleState.OPEN, txOpts);
 
     return await this.crucibleWrapper.lock(this.address, txOpts);
+  }
+
+  /**
+   * Used to put the crucible into the JUDGEMENT state.  This action is done
+   * to allow the oracle a period of time to setGoal before moving to the
+   * FINISHED state where payouts can occur.
+   *
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async judgement(txOpts: Tx): Promise<string> {
+    await this.assertCanJudgementState(CrucibleState.LOCKED, txOpts);
+
+    return await this.crucibleWrapper.judgement(this.address, txOpts);
   }
 
   /**
@@ -88,6 +130,27 @@ export class CrucibleAPI {
    */
   public async getCommitmentCount(): Promise<BigNumber> {
     return await this.crucibleWrapper.getCommitmentCount(this.address);
+  }
+
+  /**
+   * Gets the commitment of a participant.
+   *
+   * @param  participantAddress   the address of the participant
+   * @return                      Commitment of the given participant
+   */
+  public async getCommitment(participantAddress: Address): Promise<Commitment> {
+    const result = await this.crucibleWrapper.commitments(
+      this.address,
+      participantAddress
+    );
+
+    let commitment: Commitment = {
+      exists: result[0],
+      amount: new BigNumber(result[1]),
+      metGoal: crucibleNumberToGoal(result[2])
+    };
+
+    return commitment;
   }
 
   /**
@@ -135,18 +198,53 @@ export class CrucibleAPI {
       this.assert.crucible.hasValidRiskAmountAsync(
         this.address, riskAmount
       ),
-      this.assert.crucible.hasValidParticipantAsync(
+      this.assert.crucible.participantDoesNotExistsAsync(
         this.address, participantAddress
       ),
     ]);
   }
 
-  private async assertCanLock(inState: CrucibleState, txOpts: Tx) {
+  private async assertSetGoal(
+    states: CrucibleState[],
+    participantAddress: Address,
+    txOpts: Tx
+  ) {
+    const fromAddress = txOpts.from;
+
+    this.assert.schema.isValidAddress('fromAddress', fromAddress);
+    this.assert.schema.isValidAddress('participantAddress', participantAddress);
+
     // make sure the contract we're pointed at is a Crucible
+    await this.assert.crucible.implementsCrucible(this.address);
+
+    await Promise.all([
+      this.assert.crucible.inEitherState(this.address, states),
+      this.assert.crucible.hasValidOwnerAsync(
+        this.address, fromAddress
+      ),
+      this.assert.crucible.participantExistsAsync(
+        this.address, participantAddress
+      ),
+    ]);
+
+    await this.assert.crucible.participantIsWaitingAsync(
+        this.address, participantAddress
+    );
+  }
+
+  private async assertCanLockState(inState: CrucibleState, txOpts: Tx) {
     await this.assert.crucible.implementsCrucible(this.address);
     await Promise.all([
       this.assert.crucible.inState(this.address, inState),
       this.assert.crucible.pastLockTime(this.address),
+    ]);
+  }
+
+  private async assertCanJudgementState(inState: CrucibleState, txOpts: Tx) {
+    await this.assert.crucible.implementsCrucible(this.address);
+    await Promise.all([
+      this.assert.crucible.inState(this.address, inState),
+      this.assert.crucible.pastEndTime(this.address),
     ]);
   }
 

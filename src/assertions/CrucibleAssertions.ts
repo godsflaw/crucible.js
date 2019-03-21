@@ -2,14 +2,16 @@
 
 import Web3 from 'web3';
 
-import { Address, CrucibleState } from '../types/common';
+import { Address, Commitment, CrucibleState, GoalState } from '../types/common';
 import { CrucibleContract } from '../types/generated';
 import { NULL_ADDRESS } from '../constants';
 import { crucibleAssertionErrors } from '../errors';
 import {
   BigNumber,
+  crucibleNumberToGoal,
   crucibleNumberToState,
   crucibleStateToString,
+  goalStateToString,
   now
 } from '../util';
 
@@ -40,36 +42,35 @@ export class CrucibleAssertions {
     );
 
     try {
+      // We probably don't want too many calls here, but enough to know we
+      // are working with the correct contract.
       await Promise.all([
         crucibleContract.startDate.callAsync(),
-        // crucibleContract.penalty.callAsync(),
-        // crucibleContract.feeDenominator.callAsync(),
-        // crucibleContract.participants.callAsync('0'),
-        // crucibleContract.beneficiary.callAsync(),
-        // crucibleContract.version.callAsync(),
-        // crucibleContract.penaltyPaid.callAsync(),
-        // crucibleContract.lockDate.callAsync(),
-        // crucibleContract.timeout.callAsync(),
-        // crucibleContract.passCount.callAsync(),
-        // crucibleContract.owner.callAsync(),
-        // crucibleContract.released.callAsync(),
-        // crucibleContract.feePaid.callAsync(),
-        // crucibleContract.minimumAmount.callAsync(),
-        // crucibleContract.trackingBalance.callAsync(),
-        // crucibleContract.state.callAsync(),
-        // crucibleContract.endDate.callAsync(),
-        // crucibleContract.reserve.callAsync(),
-        // crucibleContract.fee.callAsync(),
-        // crucibleContract.calculateFee.callAsync(),
-        // crucibleContract.feeNumerator.callAsync(),
-        // crucibleContract.commitments.callAsync('0'),
-        // crucibleContract.count.callAsync(),
-        // crucibleContract.participantExists.callAsync(NULL_ADDRESS),
+        crucibleContract.lockDate.callAsync(),
+        crucibleContract.minimumAmount.callAsync(),
+        crucibleContract.endDate.callAsync(),
       ]);
     } catch (error) {
       throw new Error(
         crucibleAssertionErrors.MISSING_CRUCIBLE_METHOD(crucibleAddress)
       );
+    }
+  }
+
+  public async hasValidOwnerAsync(
+    crucibleAddress: Address,
+    fromAddress: Address
+  ): Promise<void> {
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const owner = await crucibleContract.owner.callAsync();
+
+    if (fromAddress.toLowerCase() !== owner.toLowerCase()) {
+      throw new Error(crucibleAssertionErrors.ONLY_OWNER(
+        owner, fromAddress
+      ));
     }
   }
 
@@ -91,7 +92,7 @@ export class CrucibleAssertions {
     }
   }
 
-  public async hasValidParticipantAsync(
+  public async participantDoesNotExistsAsync(
     crucibleAddress: Address,
     participantAddress: Address
   ): Promise<void> {
@@ -109,6 +110,49 @@ export class CrucibleAssertions {
     }
   }
 
+  public async participantExistsAsync(
+    crucibleAddress: Address,
+    participantAddress: Address
+  ): Promise<void> {
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const participantExists =
+      await crucibleContract.participantExists.callAsync(participantAddress);
+
+    if (!participantExists) {
+      throw new Error(crucibleAssertionErrors.PARTICIPANT_DOES_NOT_EXIST(
+        participantAddress
+      ));
+    }
+  }
+
+  public async participantIsWaitingAsync(
+    crucibleAddress: Address,
+    participantAddress: Address
+  ): Promise<void> {
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const result =
+      await crucibleContract.commitments.callAsync(participantAddress);
+
+    let commitment: Commitment = {
+      exists: result[0],
+      amount: new BigNumber(result[1]),
+      metGoal: crucibleNumberToGoal(result[2])
+    };
+
+    if (commitment.metGoal !== GoalState.WAITING) {
+      throw new Error(crucibleAssertionErrors.PARTICIPANT_NOT_WAITING(
+        participantAddress,
+        goalStateToString(commitment.metGoal),
+      ));
+    }
+  }
+
   public async inState(
     crucibleAddress: Address,
     state: CrucibleState
@@ -119,12 +163,36 @@ export class CrucibleAssertions {
 
     const currentState = await crucibleContract.state.callAsync();
 
-    if (state !== currentState.toNumber()) {
+    if (state !== crucibleNumberToState(currentState)) {
       throw new Error(crucibleAssertionErrors.STATE_MISMATCH(
         crucibleStateToString(state),
         crucibleStateToString(crucibleNumberToState(currentState)),
       ));
     }
+  }
+
+  public async inEitherState(
+    crucibleAddress: Address,
+    states: CrucibleState[]
+  ): Promise<void> {
+    let statesString: string = '';
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const currentState = await crucibleContract.state.callAsync();
+
+    for (let i = 0; i < states.length; i++) {
+      if (states[i] === crucibleNumberToState(currentState)) {
+        return;
+      }
+      statesString += crucibleStateToString(states[i]) + ', ';
+    }
+
+    throw new Error(crucibleAssertionErrors.STATE_MISMATCH(
+      statesString.trim().substr(0, statesString.length - 2),
+      crucibleStateToString(crucibleNumberToState(currentState)),
+    ));
   }
 
   public async pastLockTime(crucibleAddress: Address): Promise<void> {
@@ -136,8 +204,23 @@ export class CrucibleAssertions {
     const lockDate = await crucibleContract.lockDate.callAsync();
 
     if (!lockDate.lte(rightNow)) {
-      throw new Error(crucibleAssertionErrors.NOT_PAST_LOCK_DATE(
+      throw new Error(crucibleAssertionErrors.NOT_PAST_LOCK_TIME(
         rightNow, lockDate
+      ));
+    }
+  }
+
+  public async pastEndTime(crucibleAddress: Address): Promise<void> {
+    const rightNow = now();
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const endDate = await crucibleContract.endDate.callAsync();
+
+    if (!endDate.lte(rightNow)) {
+      throw new Error(crucibleAssertionErrors.NOT_PAST_END_TIME(
+        rightNow, endDate
       ));
     }
   }

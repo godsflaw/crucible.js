@@ -105,6 +105,36 @@ test('has addCommitment', async t => {
   }
 });
 
+test('has setGoal', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.setGoal, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has lock', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.lock, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has judgement', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.judgement, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
 test('has participantExists', async t => {
   const libCrucible = t.context.libCrucible;
 
@@ -115,11 +145,71 @@ test('has participantExists', async t => {
   }
 });
 
+test('has getState', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getState, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
 test('has getCommitmentCount', async t => {
   const libCrucible = t.context.libCrucible;
 
   try {
     t.is(typeof libCrucible.getCommitmentCount, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has getCommitment', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getCommitment, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has getGoalState', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getGoalState, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has getCommitAmount', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getCommitAmount, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has getTxReceipt', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.getTxReceipt, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test('has waitForTxToComplete', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.waitForTxToComplete, 'function');
   } catch (err) {
     t.fail(err.message);
   }

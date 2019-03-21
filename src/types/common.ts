@@ -8,11 +8,6 @@ export { Tx } from 'web3/eth/types';
 export { Address, UInt } from 'set-protocol-utils';
 export { BaseContract } from './base_contract';
 
-export interface Component {
-  address: Address;
-  unit: BigNumber;
-}
-
 export enum GoalState {
   WAITING = 0,
   PASS    = 1,
@@ -29,22 +24,11 @@ export enum CrucibleState {
   KILLED    = 6
 };
 
-export interface JSONRPCRequestPayload {
-  params: any[];
-  method: string;
-  id: number;
-  jsonrpc: string;
+export interface Commitment {
+  exists: boolean;
+  amount: BigNumber;
+  metGoal: GoalState;
 }
-
-export interface JSONRPCResponsePayload {
-  result: any;
-  id: number;
-  jsonrpc: string;
-}
-
-export declare type JSONRPCErrorCallback =
-  (err: Error | null, result?: JSONRPCResponsePayload) => void;
-
 
 export const classUtils = {
   bindAll(self: any, exclude: string[] = ["contructor"], thisArg?: any): void {
