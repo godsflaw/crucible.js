@@ -139,16 +139,16 @@ export class CrucibleAPI {
    * @return                      Commitment of the given participant
    */
   public async getCommitment(participantAddress: Address): Promise<Commitment> {
-    let commitment: Commitment;
-
     const result = await this.crucibleWrapper.commitments(
       this.address,
       participantAddress
     );
 
-    commitment.exists = result[0];
-    commitment.amount = result[1];
-    commitment.metGoal = crucibleNumberToGoal(result[2]);
+    let commitment: Commitment = {
+      exists: result[0],
+      amount: result[1],
+      metGoal: crucibleNumberToGoal(result[2])
+    };
 
     return commitment;
   }
@@ -198,7 +198,7 @@ export class CrucibleAPI {
       this.assert.crucible.hasValidRiskAmountAsync(
         this.address, riskAmount
       ),
-      this.assert.crucible.hasValidParticipantAsync(
+      this.assert.crucible.participantDoesNotExistsAsync(
         this.address, participantAddress
       ),
     ]);
@@ -222,10 +222,14 @@ export class CrucibleAPI {
       this.assert.crucible.hasValidOwnerAsync(
         this.address, fromAddress
       ),
-      this.assert.crucible.hasValidParticipantAsync(
+      this.assert.crucible.participantExistsAsync(
         this.address, participantAddress
       ),
     ]);
+
+    await this.assert.crucible.participantIsWaitingAsync(
+        this.address, participantAddress
+    );
   }
 
   private async assertCanLockState(inState: CrucibleState, txOpts: Tx) {

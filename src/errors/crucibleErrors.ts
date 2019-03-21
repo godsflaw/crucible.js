@@ -20,6 +20,13 @@ export const crucibleAssertionErrors = {
   PARTICIPANT_EXISTS: (participantAddress: Address) =>
     `Participant with address ${participantAddress} already exists.`,
 
+  PARTICIPANT_DOES_NOT_EXIST: (participantAddress: Address) =>
+    `Participant with address ${participantAddress} doesn't exist.`,
+
+  PARTICIPANT_NOT_WAITING: (participantAddress: Address, goalState: string) =>
+    `Participant with address ${participantAddress} already has goal set to ` +
+    `${goalState}.`,
+
   RISK_AMOUNT_TOO_LOW: (minAmount: BigNumber, riskAmount: BigNumber) =>
     `Risked amount ${riskAmount} must be at least ${minAmount}.`,
 

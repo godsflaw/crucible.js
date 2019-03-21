@@ -10,6 +10,7 @@ import { Address, Commitment, TransactionReceipt, Tx } from './types/common';
 import {
   awaitTx,
   BigNumber,
+  goalStateToString,
   instantiateWeb3
 } from './util';
 
@@ -283,7 +284,7 @@ class LibCrucible {
   }
 
   /**
-   * check to see of a participant exists
+   * get the current crucible state
    *
    * @return                      the current state
    */
@@ -320,6 +321,38 @@ class LibCrucible {
     }
 
     return await this.crucible.getCommitment(participantAddress);
+  }
+
+  /**
+   * Gets the goal state for the participant.
+   *
+   * @param  participantAddress the address of the participan
+   * @return                    goal state of a participant
+   */
+  public async getGoalState(participantAddress: Address): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    let commitment = await this.getCommitment(participantAddress);
+
+    return goalStateToString(commitment.metGoal);
+  }
+
+  /**
+   * Gets the commitment amount for the participant.
+   *
+   * @param  participantAddress the address of the participan
+   * @return                    goal state of a participant
+   */
+  public async getCommitAmount(participantAddress: Address): Promise<BigNumber> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    let commitment = await this.getCommitment(participantAddress);
+
+    return commitment.amount;
   }
 
   /*

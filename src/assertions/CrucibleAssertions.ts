@@ -2,14 +2,16 @@
 
 import Web3 from 'web3';
 
-import { Address, CrucibleState } from '../types/common';
+import { Address, Commitment, CrucibleState, GoalState } from '../types/common';
 import { CrucibleContract } from '../types/generated';
 import { NULL_ADDRESS } from '../constants';
 import { crucibleAssertionErrors } from '../errors';
 import {
   BigNumber,
+  crucibleNumberToGoal,
   crucibleNumberToState,
   crucibleStateToString,
+  goalStateToString,
   now
 } from '../util';
 
@@ -90,7 +92,7 @@ export class CrucibleAssertions {
     }
   }
 
-  public async hasValidParticipantAsync(
+  public async participantDoesNotExistsAsync(
     crucibleAddress: Address,
     participantAddress: Address
   ): Promise<void> {
@@ -104,6 +106,49 @@ export class CrucibleAssertions {
     if (participantExists) {
       throw new Error(crucibleAssertionErrors.PARTICIPANT_EXISTS(
         participantAddress
+      ));
+    }
+  }
+
+  public async participantExistsAsync(
+    crucibleAddress: Address,
+    participantAddress: Address
+  ): Promise<void> {
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const participantExists =
+      await crucibleContract.participantExists.callAsync(participantAddress);
+
+    if (!participantExists) {
+      throw new Error(crucibleAssertionErrors.PARTICIPANT_DOES_NOT_EXIST(
+        participantAddress
+      ));
+    }
+  }
+
+  public async participantIsWaitingAsync(
+    crucibleAddress: Address,
+    participantAddress: Address
+  ): Promise<void> {
+    const crucibleContract = await CrucibleContract.at(
+      crucibleAddress, this.web3, {}
+    );
+
+    const result =
+      await crucibleContract.commitments.callAsync(participantAddress);
+
+    let commitment: Commitment = {
+      exists: result[0],
+      amount: result[1],
+      metGoal: crucibleNumberToGoal(result[2])
+    };
+
+    if (commitment.metGoal !== GoalState.WAITING) {
+      throw new Error(crucibleAssertionErrors.PARTICIPANT_NOT_WAITING(
+        participantAddress,
+        goalStateToString(commitment.metGoal),
       ));
     }
   }
@@ -141,12 +186,11 @@ export class CrucibleAssertions {
       if (states[i] === crucibleNumberToState(currentState)) {
         return;
       }
-      statesString = statesString + crucibleStateToString(states[i]) +
-        (states.length >= (i + 1)) ? ' or ' : '';
+      statesString += crucibleStateToString(states[i]) + ', ';
     }
 
     throw new Error(crucibleAssertionErrors.STATE_MISMATCH(
-      statesString,
+      statesString.trim().substr(0, statesString.length - 2),
       crucibleStateToString(crucibleNumberToState(currentState)),
     ));
   }
