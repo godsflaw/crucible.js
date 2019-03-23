@@ -135,6 +135,16 @@ test('has judgement', async t => {
   }
 });
 
+test('has finish', async t => {
+  const libCrucible = t.context.libCrucible;
+
+  try {
+    t.is(typeof libCrucible.finish, 'function');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
 test('has participantExists', async t => {
   const libCrucible = t.context.libCrucible;
 

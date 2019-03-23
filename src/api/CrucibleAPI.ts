@@ -124,6 +124,21 @@ export class CrucibleAPI {
   }
 
   /**
+   * Used to put the crucible into the FINISHED state.  This action is done
+   * after the oracle has called setGoal() on all participants.  This state
+   * allows for payouts to occur.
+   *
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async finish(txOpts: Tx): Promise<string> {
+    await this.assertCanFinishState(CrucibleState.JUDGEMENT, txOpts);
+
+    return await this.crucibleWrapper.finish(this.address, txOpts);
+  }
+
+  /**
    * Gets the number of participants/commitments in this crucible
    *
    * @return                 Number of commitments in crucible
@@ -245,6 +260,20 @@ export class CrucibleAPI {
     await Promise.all([
       this.assert.crucible.inState(this.address, inState),
       this.assert.crucible.pastEndTime(this.address),
+    ]);
+  }
+
+  private async assertCanFinishState(inState: CrucibleState, txOpts: Tx) {
+    const fromAddress = txOpts.from;
+
+    this.assert.schema.isValidAddress('fromAddress', fromAddress);
+
+    await this.assert.crucible.implementsCrucible(this.address);
+    await Promise.all([
+      this.assert.crucible.inState(this.address, inState),
+      this.assert.crucible.hasValidOwnerAsync(
+        this.address, fromAddress
+      ),
     ]);
   }
 

@@ -201,7 +201,7 @@ test.serial('crucible should toss error if value is too low', async t => {
         cu.minAmountWei + '.',
       'got correct error message'
     );
-    let commitments = await libCrucible.getCommitmentCount();
+    const commitments = await libCrucible.getCommitmentCount();
     t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
   }
 });
@@ -226,7 +226,7 @@ test.serial('addCommitment should throw participantExists error', async t => {
       'participant with address ' + address.user1 + ' already exists.',
       'got correct error message'
     );
-    let commitments = await libCrucible.getCommitmentCount();
+    const commitments = await libCrucible.getCommitmentCount();
     t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
   }
 });
@@ -277,7 +277,7 @@ test.serial('crucible should toss error if in LOCKED state', async t => {
       'The current state is LOCKED but must be OPEN.',
       'got correct error message'
     );
-    let commitments = await libCrucible.getCommitmentCount();
+    const commitments = await libCrucible.getCommitmentCount();
     t.truthy(commitments.eq(new BigNumber(2)), 'commitment count is correct');
   }
 });
@@ -318,7 +318,7 @@ test.serial('can setGoal in the locked state', async t => {
     // check and set goal for user1
     let goal = await libCrucible.getGoalState(address.user1);
     t.is(goal, 'WAITING', 'got the correct goal');
-    let txHash = await libCrucible.setGoal(address.user1, false, cu.txOpts);
+    const txHash = await libCrucible.setGoal(address.user1, false, cu.txOpts);
     await libCrucible.waitForTxToComplete(txHash);
     goal = await libCrucible.getGoalState(address.user1);
     t.is(goal, 'FAIL', 'got the correct goal');
@@ -340,9 +340,9 @@ test.serial('can change state to judgement state', async t => {
   try {
     // change and check crucible state
     await cu.sleep(5000);
-    let txHash = await libCrucible.judgement(cu.txOpts);
+    const txHash = await libCrucible.judgement(cu.txOpts);
     await libCrucible.waitForTxToComplete(txHash);
-    let state = await libCrucible.getState();
+    const state = await libCrucible.getState();
     t.is(state, 'JUDGEMENT', 'got the correct state');
   } catch (err) {
     t.fail(err.message);
@@ -363,12 +363,86 @@ test.serial('can setGoal in the judgement state', async t => {
     // check and set goal for user2
     let goal = await libCrucible.getGoalState(address.user2);
     t.is(goal, 'WAITING', 'got the correct goal');
-    let txHash = await libCrucible.setGoal(address.user2, true, cu.txOpts);
+    const txHash = await libCrucible.setGoal(address.user2, true, cu.txOpts);
     await libCrucible.waitForTxToComplete(txHash);
     goal = await libCrucible.getGoalState(address.user2);
     t.is(goal, 'PASS', 'got the correct goal');
   } catch (err) {
     t.fail(err.message);
+  }
+});
+
+test.serial('tosses error if finish() called by non-owner', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  try {
+    // check crucible state
+    const state = await libCrucible.getState();
+    t.is(state, 'JUDGEMENT', 'got the correct state');
+
+    cu.txOpts.from = address.user2;
+    cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+      address.user2
+    );
+    await libCrucible.finish(cu.txOpts);
+    t.fail('should have tossed an error');
+  } catch (err) {
+    t.is(
+      err.message.toLowerCase(),
+      'this function can only be called by the owner (' +
+      address.oracle.toLowerCase() + '), you passed: ' + address.user2 + '.',
+      'throws error'
+    );
+  }
+});
+
+test.serial('can change to FINISHED state', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.oracle;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
+
+  try {
+    // check crucible state
+    let state = await libCrucible.getState();
+    t.is(state, 'JUDGEMENT', 'got the correct state');
+
+    const txHash = await libCrucible.finish(cu.txOpts);
+    await libCrucible.waitForTxToComplete(txHash);
+    state = await libCrucible.getState();
+    t.is(state, 'FINISHED', 'got the correct state');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test.serial('tosses error if we are already in the FINISHED', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.oracle;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
+
+  try {
+    const state = await libCrucible.getState();
+    t.is(state, 'FINISHED', 'got the correct state');
+    await libCrucible.finish(cu.txOpts);
+    t.fail('should have tossed an error');
+  } catch (err) {
+    t.is(
+      err.message,
+      'The current state is FINISHED but must be JUDGEMENT.',
+      'throws error'
+    );
   }
 });
 

@@ -268,6 +268,23 @@ class LibCrucible {
   }
 
   /**
+   * Used to put the crucible into the FINISHED state.  This action is done
+   * after the oracle has called setGoal() on all participants.  This state
+   * allows for payouts to occur.
+   *
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async finish(txOpts: Tx): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.finish(txOpts);
+  }
+
+  /**
    * check to see of a participant exists
    *
    * @param  participantAddress   the address of the participant
