@@ -422,7 +422,7 @@ test.serial('can change to FINISHED state', async t => {
   }
 });
 
-test.serial('tosses error if we are already in the FINISHED', async t => {
+test.serial('tosses error if we are already in the FINISHED state', async t => {
   const libCrucible = t.context.libCrucible;
   const cu = t.context.cu;
   const address = t.context.address;
