@@ -39,7 +39,7 @@ class LibCrucible {
    */
   // public listings: ListingAPI;
 
-    /**
+  /**
    * Instantiates a new Crucible instance that provides the public interface
    * to the Crucible.js library
    *
@@ -123,6 +123,25 @@ class LibCrucible {
   }
 
   /**
+   * removes the listing of a crucible from the foundry
+   *
+   * @param  crucibleAddress  the crucible address to remove from the foundry
+   * @param  txOpts           Transaction options object conforming to `Tx` with
+   *                          signer, gas, and gasPrice data
+   * @return                  Transaction hash
+   */
+  public async deleteCrucibleFromFoundry(
+    crucibleAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    return await this.foundry.deleteCrucible(crucibleAddress, txOpts);
+  }
+
+  /*
+   * FOUNDRY GETTER METHODS
+   */
+
+  /**
    * get the number of crucibles tracked by the foundry
    *
    * @return                  The number of crucibles tracked by the foundry
@@ -174,21 +193,6 @@ class LibCrucible {
     );
   }
 
-  /**
-   * removes the listing of a crucible from the foundry
-   *
-   * @param  crucibleAddress  the crucible address to remove from the foundry
-   * @param  txOpts           Transaction options object conforming to `Tx` with
-   *                          signer, gas, and gasPrice data
-   * @return                  Transaction hash
-   */
-  public async deleteCrucibleFromFoundry(
-    crucibleAddress: Address,
-    txOpts: Tx
-  ): Promise<string> {
-    return await this.foundry.deleteCrucible(crucibleAddress, txOpts);
-  }
-
   /*
    * METHODS THAT WORK ON A CRUCIBLE
    */
@@ -232,6 +236,27 @@ class LibCrucible {
     }
 
     return await this.crucible.setGoal(participantAddress, metGoal, txOpts);
+  }
+
+  /**
+   * This call is used by the oracle to collect the fee for providing validation
+   * services and if there is a beneficiary of the penalty, it will pay that
+   * address out too.  A beneficiary can only be set on crucible creation.
+   *
+   * @param  destinationAddress   The address to send the fee to
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async collectFee(
+    destinationAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.collectFee(destinationAddress, txOpts);
   }
 
   /**
@@ -283,6 +308,10 @@ class LibCrucible {
 
     return await this.crucible.finish(txOpts);
   }
+
+  /*
+   * CRUCIBLE GETTER METHODS
+   */
 
   /**
    * check to see of a participant exists
