@@ -446,6 +446,64 @@ test.serial('tosses error if we are already in the FINISHED state', async t => {
   }
 });
 
+test.serial('tosses error if collectFee() called by non-owner', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  try {
+    // check crucible state
+    let state = await libCrucible.getState();
+    t.is(state, 'FINISHED', 'got the correct state');
+
+    cu.txOpts.from = address.user3;
+    cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+      address.user3
+    );
+    await libCrucible.collectFee(address.user3, cu.txOpts);
+    t.fail('should have tossed an error');
+  } catch (err) {
+    t.is(
+      err.message.toLowerCase(),
+      'this function can only be called by the owner (' +
+      address.oracle.toLowerCase() + '), you passed: ' + address.user3 + '.',
+      'throws error'
+    );
+  }
+});
+
+test.serial('collectFee() pays user3', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  cu.txOpts.from = address.oracle;
+  cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+    address.oracle
+  );
+
+  try {
+    // check crucible state
+    let state = await libCrucible.getState();
+    t.is(state, 'FINISHED', 'got the correct state');
+
+    const user3StartBalance = new BigNumber(
+      await libCrucible.web3.eth.getBalance(address.user3)
+    );
+
+    const txHash = await libCrucible.collectFee(address.user3, cu.txOpts);
+    await libCrucible.waitForTxToComplete(txHash);
+
+    const user3Balance = new BigNumber(
+      await libCrucible.web3.eth.getBalance(address.user3)
+    );
+
+    t.true(user3Balance.gt(user3StartBalance), 'balance increased');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
 test.serial('removes an existing crucible from the foundry', async t => {
   const libCrucible = t.context.libCrucible;
   const crucibleAddress = t.context.crucibleAddress;

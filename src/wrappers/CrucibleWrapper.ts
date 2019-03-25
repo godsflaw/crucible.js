@@ -75,6 +75,29 @@ export class CrucibleWrapper {
   }
 
   /**
+   * Collect the fee and payout beneficiary
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  destinationAddress The address to send the fee to
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async collectFee(
+    crucibleAddress: Address,
+    destinationAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.collectFee.sendTransactionAsync(
+      destinationAddress,
+      txOptions
+    );
+  }
+
+  /**
    * Gets the number of participants/commitments in this crucible
    *
    * @param  crucibleAddress      The address of the crucible contract

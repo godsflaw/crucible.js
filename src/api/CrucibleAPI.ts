@@ -95,6 +95,31 @@ export class CrucibleAPI {
   }
 
   /**
+   * This call is used by the oracle to collect the fee for providing validation
+   * services and if there is a beneficiary of the penalty, it will pay that
+   * address out too.  A beneficiary can only be set on crucible creation.
+   *
+   * @param  destinationAddress   The address to send the fee to
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async collectFee(
+    destinationAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    await this.assertCollectFee(
+      [CrucibleState.FINISHED, CrucibleState.BROKEN],
+      destinationAddress,
+      txOpts
+    );
+
+    return await this.crucibleWrapper.collectFee(
+      this.address, destinationAddress, txOpts
+    );
+  }
+
+  /**
    * Used to lock the crucible.  This action prevents more commitments
    * from being added, and usually indicates the active period of the crucuble.
    *
@@ -245,6 +270,27 @@ export class CrucibleAPI {
     await this.assert.crucible.participantIsWaitingAsync(
         this.address, participantAddress
     );
+  }
+
+  private async assertCollectFee(
+    states: CrucibleState[],
+    destinationAddress: Address,
+    txOpts: Tx
+  ) {
+    const fromAddress = txOpts.from;
+
+    this.assert.schema.isValidAddress('fromAddress', fromAddress);
+    this.assert.schema.isValidAddress('destinationAddress', destinationAddress);
+
+    // make sure the contract we're pointed at is a Crucible
+    await this.assert.crucible.implementsCrucible(this.address);
+
+    await Promise.all([
+      this.assert.crucible.inEitherState(this.address, states),
+      this.assert.crucible.hasValidOwnerAsync(
+        this.address, fromAddress
+      ),
+    ]);
   }
 
   private async assertCanLockState(inState: CrucibleState, txOpts: Tx) {
