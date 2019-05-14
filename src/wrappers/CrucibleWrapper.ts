@@ -98,6 +98,32 @@ export class CrucibleWrapper {
   }
 
   /**
+   * This call is used by anyone to payout a participant.
+   *
+   * @param  crucibleAddress    The address of the crucible contract
+   * @param  index              The BigNumber of the index to payout
+   * @param  records            The BigNumber of records from index to payout
+   * @param  txOpts             Transaction options object conforming to `Tx`
+   *                            with signer, gas, gasPrice, and value data
+   * @return                    The hash of the resulting transaction.
+   */
+  public async payout(
+    crucibleAddress: Address,
+    index: BigNumber,
+    records: BigNumber,
+    txOpts: Tx
+  ): Promise<string> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    const txOptions = await generateTxOpts(this.web3, txOpts);
+
+    return await crucibleInstance.payout.sendTransactionAsync(
+      index,
+      records,
+      txOptions
+    );
+  }
+
+  /**
    * Gets the number of participants/commitments in this crucible
    *
    * @param  crucibleAddress      The address of the crucible contract
@@ -126,7 +152,7 @@ export class CrucibleWrapper {
   }
 
   /**
-   * Gets the number of participants/commitments in this crucible
+   * check to see of a participant exists
    *
    * @param  crucibleAddress      The address of the crucible contract
    * @param  participantAddress   the address of the participant
@@ -141,6 +167,37 @@ export class CrucibleWrapper {
     return await crucibleInstance.participantExists.callAsync(
       participantAddress
     );
+  }
+
+  /**
+   * Get participant index.  When calling this method make sure the
+   * participant exists first.  If no participant is found -1 is returned.
+   *
+   * @param  crucibleAddress      The address of the crucible contract
+   * @param  participantAddress   the address of the participant
+   * @return                      BigNumber of the participant index or
+   *                              returns -1 if participant is not found
+   */
+  public async participantIndex(
+    crucibleAddress: Address,
+    participantAddress: Address
+  ): Promise<BigNumber> {
+    const crucibleInstance = await this.contracts.loadCrucible(crucibleAddress);
+    let participantCount = await crucibleInstance.count.callAsync();
+
+    // This is something that needs to be fixed.  A blocking loop iteration
+    // here is super inefficient.
+    for (let i = 0; i < participantCount.toNumber(); i++) {
+      let addr = await crucibleInstance.participants.callAsync(
+        new BigNumber(i)
+      );
+
+      if (addr.toLowerCase() === participantAddress.toLowerCase()) {
+        return new BigNumber(i);
+      }
+    }
+
+    return new BigNumber(-1);
   }
 
   /**
