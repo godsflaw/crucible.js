@@ -244,7 +244,6 @@ export class CrucibleAPI {
   public async participantIndex(
     participantAddress: Address
   ): Promise<BigNumber> {
-    // TODO(godsflaw): test me
     await this.assert.crucible.participantExistsAsync(
       this.address, participantAddress
     );
