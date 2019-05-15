@@ -504,6 +504,85 @@ test.serial('collectFee() pays user3', async t => {
   }
 });
 
+test.serial('payout() called by oracle on user1', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  const user1StartBalance = new BigNumber(
+    await libCrucible.web3.eth.getBalance(address.user1)
+  );
+
+  try {
+    // check crucible state
+    let state = await libCrucible.getState();
+    t.is(state, 'FINISHED', 'got the correct state');
+
+    cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+      address.oracle
+    );
+    let txHash = await libCrucible.payout(address.user1, cu.txOpts);
+    await libCrucible.waitForTxToComplete(txHash);
+
+    const user1Balance = new BigNumber(
+      await libCrucible.web3.eth.getBalance(address.user1)
+    );
+
+    t.true(user1Balance.eq(user1StartBalance), 'balance the same');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test.serial('payout() called by oracle and pays user2', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  const user2StartBalance = new BigNumber(
+    await libCrucible.web3.eth.getBalance(address.user2)
+  );
+
+  try {
+    cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+      address.oracle
+    );
+    cu.txOpts.from = address.oracle;
+    let txHash = await libCrucible.payout(address.user2, cu.txOpts);
+    await libCrucible.waitForTxToComplete(txHash);
+
+    const user2Balance = new BigNumber(
+      await libCrucible.web3.eth.getBalance(address.user2)
+    );
+
+    t.true(user2Balance.gt(user2StartBalance), 'balance increased');
+  } catch (err) {
+    t.fail(err.message);
+  }
+});
+
+test.serial('tosses error if payout() called after state is paid', async t => {
+  const libCrucible = t.context.libCrucible;
+  const cu = t.context.cu;
+  const address = t.context.address;
+
+  try {
+    cu.txOpts.from = address.user3;
+    cu.txOpts.nonce = await libCrucible.web3.eth.getTransactionCount(
+      address.user3
+    );
+    let txHash = await libCrucible.payout(address.user3, cu.txOpts);
+    await libCrucible.waitForTxToComplete(txHash);
+    t.fail('should have tossed an error');
+  } catch (err) {
+    t.is(
+      err.message.toLowerCase(),
+      'the current state is paid but must be finished, broken.',
+      'throws error'
+    );
+  }
+});
+
 test.serial('removes an existing crucible from the foundry', async t => {
   const libCrucible = t.context.libCrucible;
   const crucibleAddress = t.context.crucibleAddress;

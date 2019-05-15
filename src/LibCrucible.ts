@@ -260,6 +260,26 @@ class LibCrucible {
   }
 
   /**
+   * This call is used by anyone to payout a participant.  Anyone can call
+   * this either when the crucible is in the FINISHED state or the BROKEN state.
+   *
+   * @param  participantAddress   The participant to payout
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async payout(
+    participantAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    if (this.crucible === undefined) {
+      throw new Error(libCrucibleErrors.CRUCIBLE_UNDEFINED());
+    }
+
+    return await this.crucible.payout(participantAddress, txOpts);
+  }
+
+  /**
    * Used to lock the crucible.  This action prevents more commitments
    * from being added, and usually indicates the active period of the crucuble.
    *

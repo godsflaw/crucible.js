@@ -120,6 +120,33 @@ export class CrucibleAPI {
   }
 
   /**
+   * This call is used by anyone to payout a participant.  Anyone can call
+   * this either when the crucible is in the FINISHED state or the BROKEN state.
+   *
+   * @param  participantAddress   The participant to payout
+   * @param  txOpts               Transaction options object conforming to
+   *                              `Tx` with signer, gas, and gasPrice data
+   * @return                      Transaction hash
+   */
+  public async payout(
+    participantAddress: Address,
+    txOpts: Tx
+  ): Promise<string> {
+    await this.assertPayout(
+      [CrucibleState.FINISHED, CrucibleState.BROKEN],
+      participantAddress,
+      txOpts
+    );
+
+    return await this.crucibleWrapper.payout(
+      this.address,
+      await this.participantIndex(participantAddress),
+      new BigNumber(1),
+      txOpts
+    );
+  }
+
+  /**
    * Used to lock the crucible.  This action prevents more commitments
    * from being added, and usually indicates the active period of the crucuble.
    *
@@ -194,7 +221,7 @@ export class CrucibleAPI {
   }
 
   /**
-   * Gets the number of participants/commitments in this crucible
+   * check to see of a participant exists
    *
    * @param  participantAddress   the address of the participant
    * @return                      true if participant exists, false otherwise
@@ -203,6 +230,25 @@ export class CrucibleAPI {
     participantAddress: Address
   ): Promise<boolean> {
     return await this.crucibleWrapper.participantExists(
+      this.address,
+      participantAddress
+    );
+  }
+
+  /**
+   * get participant index
+   *
+   * @param  participantAddress   the address of the participant
+   * @return                      BigNumber of the participant index
+   */
+  public async participantIndex(
+    participantAddress: Address
+  ): Promise<BigNumber> {
+    await this.assert.crucible.participantExistsAsync(
+      this.address, participantAddress
+    );
+
+    return await this.crucibleWrapper.participantIndex(
       this.address,
       participantAddress
     );
@@ -289,6 +335,27 @@ export class CrucibleAPI {
       this.assert.crucible.inEitherState(this.address, states),
       this.assert.crucible.hasValidOwnerAsync(
         this.address, fromAddress
+      ),
+    ]);
+  }
+
+  private async assertPayout(
+    states: CrucibleState[],
+    participantAddress: Address,
+    txOpts: Tx
+  ) {
+    const fromAddress = txOpts.from;
+
+    this.assert.schema.isValidAddress('fromAddress', fromAddress);
+    this.assert.schema.isValidAddress('participantAddress', participantAddress);
+
+    // make sure the contract we're pointed at is a Crucible
+    await this.assert.crucible.implementsCrucible(this.address);
+
+    await Promise.all([
+      this.assert.crucible.inEitherState(this.address, states),
+      this.assert.crucible.participantExistsAsync(
+        this.address, participantAddress
       ),
     ]);
   }
